@@ -10,7 +10,7 @@ namespace Konyvelo;
 
 public static class Config
 {
-    private const string CONNECTION_STRING_KEY = "sqliteConnectionString";
+    private const string CONNECTION_STRING_KEY = "SqliteConnectionString";
     private const string MIGRATIONS_ASSEMBLY_NAME = "Konyvelo.Logic";
 
     public static void ConfigureDbContext(this WebApplicationBuilder builder)

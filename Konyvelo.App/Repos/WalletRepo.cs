@@ -1,11 +1,11 @@
 ﻿using CsharpGoodies.Repo;
+using Konyvelo.Logic.Data;
 using Konyvelo.Logic.Domain;
-using Microsoft.EntityFrameworkCore;
 
 namespace Konyvelo.Logic.Repos;
 public class WalletRepo : CrudRepo<Wallet>
 {
-    public WalletRepo(DbContext context) : base(context)
+    public WalletRepo(KonyveloDbContext context) : base(context)
     {
     }
 }
