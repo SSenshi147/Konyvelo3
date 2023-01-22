@@ -1,7 +1,7 @@
 ﻿using CsharpGoodies.MediatrCrud.Commands;
-using Konyvelo.App.Domain;
+using Konyvelo.Logic.Domain;
 
-namespace Konyvelo.App.Crud.Wallets;
+namespace Konyvelo.Logic.Crud.Wallets;
 
 public class DeleteWalletCommand : DeleteEntityCommand<Wallet>
 {

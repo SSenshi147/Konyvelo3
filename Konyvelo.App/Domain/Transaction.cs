@@ -1,6 +1,6 @@
 ﻿using CsharpGoodies.Domain;
 
-namespace Konyvelo.App.Domain;
+namespace Konyvelo.Logic.Domain;
 public class Transaction : Entity
 {
     public DateTime Date { get; set; }

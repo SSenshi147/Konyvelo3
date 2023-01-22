@@ -1,6 +1,6 @@
 ﻿using CsharpGoodies.Domain;
 
-namespace Konyvelo.App.Domain;
+namespace Konyvelo.Logic.Domain;
 public class Currency : Entity
 {
     public string Name { get; set; } = string.Empty;

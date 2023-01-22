@@ -1,7 +1,7 @@
 ﻿using CsharpGoodies.MediatrCrud.Commands;
-using Konyvelo.App.Domain;
+using Konyvelo.Logic.Domain;
 
-namespace Konyvelo.App.Crud.Transactions;
+namespace Konyvelo.Logic.Crud.Transactions;
 
 public class UpdateTransactionCommand : UpdateEntityCommand<Transaction>
 {

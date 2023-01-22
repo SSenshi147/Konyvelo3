@@ -1,7 +1,7 @@
 ﻿using CsharpGoodies.MediatrCrud.Queries;
-using Konyvelo.App.Domain;
+using Konyvelo.Logic.Domain;
 
-namespace Konyvelo.App.Crud.Currencies;
+namespace Konyvelo.Logic.Crud.Currencies;
 
 public class GetAllCurrenciesQuery : GetAllQuery<Currency>
 {

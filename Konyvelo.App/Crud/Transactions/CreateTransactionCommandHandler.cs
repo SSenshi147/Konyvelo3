@@ -1,8 +1,8 @@
 ﻿using CsharpGoodies.MediatrCrud.CommandHandlers;
 using CsharpGoodies.Repo;
-using Konyvelo.App.Domain;
+using Konyvelo.Logic.Domain;
 
-namespace Konyvelo.App.Crud.Transactions;
+namespace Konyvelo.Logic.Crud.Transactions;
 public class CreateTransactionCommandHandler : CreateEntityCommandHandler<Transaction, CreateTransactionCommand>
 {
     public CreateTransactionCommandHandler(ICrudRepo<Transaction> crudRepo) : base(crudRepo)

@@ -1,8 +1,8 @@
 ﻿using CsharpGoodies.Repo;
-using Konyvelo.App.Domain;
+using Konyvelo.Logic.Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace Konyvelo.App.Repos;
+namespace Konyvelo.Logic.Repos;
 public class TransactionRepo : CrudRepo<Transaction>
 {
     public TransactionRepo(DbContext context) : base(context)

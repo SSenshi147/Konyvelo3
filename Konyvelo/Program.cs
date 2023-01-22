@@ -9,6 +9,10 @@ public class Program
         builder.Services.AddRazorPages();
         builder.Services.AddServerSideBlazor();
 
+        builder.ConfigureDbContext();
+        builder.ConfigureRepos();
+        builder.ConfigureMediatr();
+
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
