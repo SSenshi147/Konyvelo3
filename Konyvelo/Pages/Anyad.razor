@@ -1,0 +1,122 @@
+﻿@page "/anyad"
+@using Konyvelo.Logic.Crud.Currencies;
+
+@inject IMediator _mediator
+
+<h3>Currentcies and Wallets</h3>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>Currency name</th>
+            <th>Currency code</th>
+            <th>
+                @if (_newCurrency == null)
+                {
+                    <button onclick="@(() => this.EditCurrency())">New</button>
+                }
+                else
+                {
+                    <button disabled>New</button>
+                }
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var currency in _currencies)
+        {
+            <tr>
+                <td>@currency.Name</td>
+                <td>@currency.Code</td>
+                <td>
+                    @if (_newCurrency == null)
+                    {
+                        <button>Edit</button>
+                    }
+                    else
+                    {
+                        <button disabled>Edit</button>
+                    }
+                </td>
+                <td>
+                    @if (_newCurrency == null)
+                    {
+                        <button>Delete</button>
+                    }
+                    else
+                    {
+                        <button disabled>Delete</button>
+                    }
+                </td>
+            </tr>
+        }
+        @if (_newCurrency != null)
+        {
+            <tr>
+                <td><input type="text" @bind="_newCurrency.Name" /></td>
+                <td><input type="text" @bind="_newCurrency.Code" /></td>
+                <td><button @onclick="async() => await SaveCurrency()">Save</button></td>
+                <td><button @onclick="() => DiscardCurrency()">Discard</button></td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<table>
+    <thead>
+        <tr>
+            <th>Wallet name</th>
+            <th>Wallet currency</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var wallet in _wallets)
+        {
+            <tr>
+                <td>@wallet.Name</td>
+                <td>@wallet.Currency.Name</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private Currency? _newCurrency = null;
+    private List<Currency> _currencies = new();
+    private Wallet _newWallet = new();
+    private List<Wallet> _wallets = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        _currencies = (await _mediator.Send(new GetAllCurrenciesQuery())).ToList();
+
+        StateHasChanged();
+    }
+
+    private void EditCurrency()
+    {
+        _newCurrency = new();
+    }
+
+    private async Task SaveCurrency()
+    {
+        await _mediator.Send(new CreateCurrencyCommand()
+        {
+            Source = _newCurrency!,
+        });
+
+        _newCurrency = null;
+
+        _currencies = (await _mediator.Send(new GetAllCurrenciesQuery())).ToList();
+
+        StateHasChanged();
+    }
+
+    private void DiscardCurrency()
+    {
+        _newCurrency = null;
+    }
+}
