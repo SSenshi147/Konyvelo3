@@ -1,6 +1,7 @@
 ﻿@page "/currencies-wallets"
 @using Konyvelo.Logic.Crud.Currencies;
 @using Konyvelo.Logic.Domain;
+@using System.Reflection;
 
 <h3>CurrenciesAndWallets</h3>
 
@@ -22,7 +23,9 @@
           ResizeMode="TableResizeMode.Columns"
           NewItemCreator="() => new Currency()"
           UseInternalEditing=false
-          RowInserted="this.Asd">
+          RowInserted="this.AddCurrency"
+          RowUpdated="this.UpdateCurrency"
+          RowRemoved="this.DeleteCurrency">
     <DataGridColumns>
         <DataGridColumn Field="@nameof(Currency.Name)" Editable></DataGridColumn>
         <DataGridColumn Field="@nameof(Currency.Code)" Editable></DataGridColumn>
@@ -66,22 +69,36 @@
         _currencies = await _mediator.Send(new GetAllCurrenciesQuery());
     }
 
-    private async Task SaveCurrency(Currency currency)
+    private async Task AddCurrency(SavedRowItem<Currency, Dictionary<string, object>> savedRowItem)
     {
+        var currency = savedRowItem.Item;
         await _mediator.Send(new CreateCurrencyCommand()
             {
                 Source = currency
             });
+
+        await LoadCurrencies();
     }
 
-    private async Task Asd(SavedRowItem<Currency, Dictionary<string, object>> asd)
+    private async Task UpdateCurrency(SavedRowItem<Currency, Dictionary<string, object>> savedRowItem)
     {
-        var currency = asd.Item;
-        await _mediator.Send(new CreateCurrencyCommand()
+        var currency = savedRowItem.Item;
+        var changes = savedRowItem.Values;
+        foreach (var change in changes)
+        {
+            var property = currency.GetType().GetProperty(change.Key);
+            property?.SetValue(currency, change.Value);
+        }
+        await _mediator.Send(new UpdateCurrencyCommand()
             {
                 Source = currency
             });
+        await LoadCurrencies();
+    }
 
+    private async Task DeleteCurrency(Currency currency)
+    {
+        await _mediator.Send(new DeleteCurrencyCommand() { Id = currency.Id });
         await LoadCurrencies();
     }
 }
