@@ -1,0 +1,87 @@
+﻿@page "/currencies-wallets"
+@using Konyvelo.Logic.Crud.Currencies;
+@using Konyvelo.Logic.Domain;
+
+<h3>CurrenciesAndWallets</h3>
+
+<DataGrid TItem="Currency"
+          Data="this._currencies"
+          Editable
+          EditMode="DataGridEditMode.Inline"
+          Sortable
+          SortMode="DataGridSortMode.Single"
+          ShowPager
+          ShowPageSizes
+          Resizable
+          Responsive
+          Bordered
+          Hoverable
+          Narrow
+          Groupable
+          ShowGrouping
+          ResizeMode="TableResizeMode.Columns"
+          NewItemCreator="() => new Currency()"
+          UseInternalEditing=false
+          RowInserted="this.Asd">
+    <DataGridColumns>
+        <DataGridColumn Field="@nameof(Currency.Name)" Editable></DataGridColumn>
+        <DataGridColumn Field="@nameof(Currency.Code)" Editable></DataGridColumn>
+        <DataGridCommandColumn PreventRowClick>
+            <NewCommandTemplate>
+                <Button Color="Color.Success" Clicked="@context.Clicked">@context.LocalizationString</Button>
+            </NewCommandTemplate>
+            <EditCommandTemplate>
+                <Button Color="Color.Primary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+            </EditCommandTemplate>
+            <SaveCommandTemplate>
+                <Button Type="ButtonType.Submit" PreventDefaultOnSubmit Color="Color.Primary" Clicked="context.Clicked">@context.LocalizationString</Button>
+            </SaveCommandTemplate>
+            <DeleteCommandTemplate>
+                <Button Color="Color.Danger" Clicked="@context.Clicked">@context.LocalizationString</Button>
+            </DeleteCommandTemplate>
+            <CancelCommandTemplate>
+                <Button Color="Color.Secondary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+            </CancelCommandTemplate>
+            <ClearFilterCommandTemplate>
+                <Button Color="Color.Warning" Clicked="@context.Clicked">@context.LocalizationString</Button>
+            </ClearFilterCommandTemplate>
+        </DataGridCommandColumn>
+    </DataGridColumns>
+</DataGrid>
+
+
+@code {
+    private Currency? _newCurrency = null;
+    private List<Currency> _currencies = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        await LoadCurrencies();
+    }
+
+    private async Task LoadCurrencies()
+    {
+        _currencies = await _mediator.Send(new GetAllCurrenciesQuery());
+    }
+
+    private async Task SaveCurrency(Currency currency)
+    {
+        await _mediator.Send(new CreateCurrencyCommand()
+            {
+                Source = currency
+            });
+    }
+
+    private async Task Asd(SavedRowItem<Currency, Dictionary<string, object>> asd)
+    {
+        var currency = asd.Item;
+        await _mediator.Send(new CreateCurrencyCommand()
+            {
+                Source = currency
+            });
+
+        await LoadCurrencies();
+    }
+}
