@@ -17,10 +17,13 @@ public class KonyveloDbContext : DbContext
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<Currency>().HasKey(x => x.Id);
+        
         modelBuilder.Entity<Wallet>().HasKey(x => x.Id);
         modelBuilder.Entity<Wallet>().HasOne(x => x.Currency).WithMany(x => x.Wallets).HasForeignKey(x => x.CurrencyId);
-        modelBuilder.Entity<Transaction>().HasKey(x => x.Id);
-
         modelBuilder.Entity<Wallet>().Ignore(x => x.TotalCalculated);
+
+        modelBuilder.Entity<Transaction>().HasKey(x => x.Id);
+        modelBuilder.Entity<Transaction>().HasOne(x => x.Wallet).WithMany(x => x.Transactions).HasForeignKey(x => x.WalletId);
+        modelBuilder.Entity<Transaction>().Ignore(x => x.TotalValue);
     }
 }

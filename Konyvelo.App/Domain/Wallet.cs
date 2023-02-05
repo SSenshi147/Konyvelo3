@@ -5,7 +5,11 @@ public class Wallet : Entity
 {
     public Guid CurrencyId { get; set; }
     public Currency Currency { get; set; } = default!;
+    
     public string Name { get; set; } = string.Empty;
+    
     public double Total { get; set; }
-    public double TotalCalculated { get; set; }
+    public double TotalCalculated => Transactions.Sum(x => x.TotalValue);
+
+    public List<Transaction> Transactions { get; set; } = new();
 }
