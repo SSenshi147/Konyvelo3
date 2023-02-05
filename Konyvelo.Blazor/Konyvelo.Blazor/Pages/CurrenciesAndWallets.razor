@@ -1,9 +1,10 @@
 ﻿@page "/currencies-wallets"
 @using Konyvelo.Logic.Crud.Currencies;
+@using Konyvelo.Logic.Crud.Wallets;
 @using Konyvelo.Logic.Domain;
 @using System.Reflection;
 
-<h3>CurrenciesAndWallets</h3>
+<h3>Currencies</h3>
 
 <DataGrid TItem="Currency"
           Data="this._currencies"
@@ -52,21 +53,99 @@
     </DataGridColumns>
 </DataGrid>
 
+<h3>Wallets</h3>
+
+<DataGrid TItem="Wallet"
+          Data="this._wallets"
+          Editable
+          EditMode="DataGridEditMode.Inline"
+          Sortable
+          SortMode="DataGridSortMode.Single"
+          ShowPager
+          ShowPageSizes
+          Resizable
+          Responsive
+          Bordered
+          Hoverable
+          Narrow
+          Groupable
+          ShowGrouping
+          ResizeMode="TableResizeMode.Columns"
+          UseInternalEditing=false
+          RowInserted="this.AddWallet"
+          RowUpdated="this.UpdateWallet"
+          RowRemoved="this.DeleteWallet">
+    <DataGridColumns>
+        <DataGridColumn Field="@nameof(Wallet.Name)" Editable></DataGridColumn>
+        <DataGridColumn Field="@nameof(Wallet.CurrencyId)" Editable>
+            <DisplayTemplate>
+                @context.Currency.Name
+            </DisplayTemplate>
+            @*https://github.com/Megabit/Blazorise/issues/293*@
+            <EditTemplate>
+                <SelectList TItem="Currency"
+                            TValue="Guid"
+                            Data="this._currencies"
+                            TextField="@(x => x.Name)"
+                            ValueField="@(x => x.Id)"
+                            SelectedValue="@((Guid)context.CellValue)"
+                            SelectedValueChanged="@(x => context.CellValue = x)"
+                            DefaultItemValue="Guid.Empty"
+                            DefaultItemText="Select currency"
+                            DefaultItemDisabled=true>
+                </SelectList>
+                @*<Select TValue="string" SelectedValue="@((string)context.CellValue)" SelectedValueChanged="@(x => context.CellValue = x)">
+                    @foreach (var item in this._currencies)
+                    {
+                        <SelectItem TValue="string" Value="@item.Id">@item.Name</SelectItem>
+                    }
+                </Select>*@
+            </EditTemplate>
+        </DataGridColumn>
+        <DataGridCommandColumn PreventRowClick>
+            <NewCommandTemplate>
+                <Button Color="Color.Success" Clicked="@context.Clicked">@context.LocalizationString</Button>
+            </NewCommandTemplate>
+            <EditCommandTemplate>
+                <Button Color="Color.Primary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+            </EditCommandTemplate>
+            <SaveCommandTemplate>
+                <Button Type="ButtonType.Submit" PreventDefaultOnSubmit Color="Color.Primary" Clicked="context.Clicked">@context.LocalizationString</Button>
+            </SaveCommandTemplate>
+            <DeleteCommandTemplate>
+                <Button Color="Color.Danger" Clicked="@context.Clicked">@context.LocalizationString</Button>
+            </DeleteCommandTemplate>
+            <CancelCommandTemplate>
+                <Button Color="Color.Secondary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+            </CancelCommandTemplate>
+            <ClearFilterCommandTemplate>
+                <Button Color="Color.Warning" Clicked="@context.Clicked">@context.LocalizationString</Button>
+            </ClearFilterCommandTemplate>
+        </DataGridCommandColumn>
+    </DataGridColumns>
+</DataGrid>
+
 
 @code {
-    private Currency? _newCurrency = null;
     private List<Currency> _currencies = new();
+    private List<Wallet> _wallets = new();
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
         await LoadCurrencies();
+        await LoadWallets();
     }
 
     private async Task LoadCurrencies()
     {
         _currencies = await _mediator.Send(new GetAllCurrenciesQuery());
+    }
+
+    private async Task LoadWallets()
+    {
+        _wallets = await _mediator.Send(new GetAllWalletsQuery());
     }
 
     private async Task AddCurrency(SavedRowItem<Currency, Dictionary<string, object>> savedRowItem)
@@ -78,6 +157,17 @@
             });
 
         await LoadCurrencies();
+    }
+
+    private async Task AddWallet(SavedRowItem<Wallet, Dictionary<string, object>> savedRowItem)
+    {
+        var wallet = savedRowItem.Item;
+        await _mediator.Send(new CreateWalletCommand()
+            {
+                Source = wallet
+            });
+
+        await LoadWallets();
     }
 
     private async Task UpdateCurrency(SavedRowItem<Currency, Dictionary<string, object>> savedRowItem)
@@ -96,9 +186,31 @@
         await LoadCurrencies();
     }
 
+    private async Task UpdateWallet(SavedRowItem<Wallet, Dictionary<string, object>> savedRowItem)
+    {
+        var wallet = savedRowItem.Item;
+        var changes = savedRowItem.Values;
+        foreach (var change in changes)
+        {
+            var property = wallet.GetType().GetProperty(change.Key);
+            property?.SetValue(wallet, change.Value);
+        }
+        await _mediator.Send(new UpdateWalletCommand()
+            {
+                Source = wallet
+            });
+        await LoadWallets();
+    }
+
     private async Task DeleteCurrency(Currency currency)
     {
         await _mediator.Send(new DeleteCurrencyCommand() { Id = currency.Id });
         await LoadCurrencies();
+    }
+
+    private async Task DeleteWallet(Wallet wallet)
+    {
+        await _mediator.Send(new DeleteWalletCommand() { Id = wallet.Id });
+        await LoadWallets();
     }
 }

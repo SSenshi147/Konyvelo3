@@ -145,12 +145,17 @@ namespace Konyvelo.Logic.Migrations
             modelBuilder.Entity("Konyvelo.Logic.Domain.Wallet", b =>
                 {
                     b.HasOne("Konyvelo.Logic.Domain.Currency", "Currency")
-                        .WithMany()
+                        .WithMany("Wallets")
                         .HasForeignKey("CurrencyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Currency");
+                });
+
+            modelBuilder.Entity("Konyvelo.Logic.Domain.Currency", b =>
+                {
+                    b.Navigation("Wallets");
                 });
 #pragma warning restore 612, 618
         }

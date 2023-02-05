@@ -18,6 +18,7 @@ public class KonyveloDbContext : DbContext
 
         modelBuilder.Entity<Currency>().HasKey(x => x.Id);
         modelBuilder.Entity<Wallet>().HasKey(x => x.Id);
+        modelBuilder.Entity<Wallet>().HasOne(x => x.Currency).WithMany(x => x.Wallets).HasForeignKey(x => x.CurrencyId);
         modelBuilder.Entity<Transaction>().HasKey(x => x.Id);
 
         modelBuilder.Entity<Wallet>().Ignore(x => x.TotalCalculated);
