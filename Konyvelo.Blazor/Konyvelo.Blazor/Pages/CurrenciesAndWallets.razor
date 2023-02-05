@@ -28,8 +28,8 @@
           RowUpdated="this.UpdateCurrency"
           RowRemoved="this.DeleteCurrency">
     <DataGridColumns>
-        <DataGridColumn Field="@nameof(Currency.Name)" Editable></DataGridColumn>
-        <DataGridColumn Field="@nameof(Currency.Code)" Editable></DataGridColumn>
+        <DataGridColumn Field="@nameof(Currency.Name)" Caption="Name" Editable></DataGridColumn>
+        <DataGridColumn Field="@nameof(Currency.Code)" Caption="Code" Editable></DataGridColumn>
         <DataGridCommandColumn PreventRowClick>
             <NewCommandTemplate>
                 <Button Color="Color.Success" Clicked="@context.Clicked">@context.LocalizationString</Button>
@@ -76,8 +76,8 @@
           RowUpdated="this.UpdateWallet"
           RowRemoved="this.DeleteWallet">
     <DataGridColumns>
-        <DataGridColumn Field="@nameof(Wallet.Name)" Editable></DataGridColumn>
-        <DataGridColumn Field="@nameof(Wallet.CurrencyId)" Editable>
+        <DataGridColumn Field="@nameof(Wallet.Name)" Caption="Name" Editable></DataGridColumn>
+        <DataGridColumn Field="@nameof(Wallet.CurrencyId)" Caption="Currency" Editable>
             <DisplayTemplate>
                 @context.Currency.Name
             </DisplayTemplate>
