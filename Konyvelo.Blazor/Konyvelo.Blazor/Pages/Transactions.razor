@@ -27,9 +27,43 @@
           RowRemoved="this.DeleteTransaction"
           NewItemCreator="() => new Transaction(){Date = DateTime.Today, Count = 1, Type = TransactionType.Expense}">
     <DataGridColumns>
-        <DataGridDateColumn Field="@nameof(Transaction.Date)" Caption="Date" Editable></DataGridDateColumn>
-        <DataGridColumn Field="@nameof(Transaction.Category)" Caption="Category" Editable></DataGridColumn>
-        <DataGridColumn Field="@nameof(Transaction.Name)" Caption="Name" Editable></DataGridColumn>
+        <DataGridDateColumn Field="@nameof(Transaction.Date)" Caption="Date" Editable>
+            <DisplayTemplate>
+                @(context.Date.ToString("yyyy.MM.dd"))
+            </DisplayTemplate>
+        </DataGridDateColumn>
+        <DataGridColumn Field="@nameof(Transaction.Category)" Caption="Category" Editable>
+            <DisplayTemplate>
+                @context.Category
+            </DisplayTemplate>
+            <EditTemplate>
+                <Autocomplete TItem="string"
+                              TValue="string"
+                              Data="@(_transactions.GroupBy(x => x.Category).Select(x => x.Key))"
+                              FreeTyping
+                              TextField="@(x => x)"
+                              ValueField="@(x => x)"
+                              SelectedValue="@((string)context.CellValue)"
+                              SelectedValueChanged="@(x => context.CellValue = x)">
+                </Autocomplete>
+            </EditTemplate>
+        </DataGridColumn>
+        <DataGridColumn Field="@nameof(Transaction.Name)" Caption="Name" Editable>
+            <DisplayTemplate>
+                @context.Name
+            </DisplayTemplate>
+            <EditTemplate>
+                <Autocomplete TItem="string"
+                              TValue="string"
+                              Data="@(_transactions.GroupBy(x => x.Name).Select(x => x.Key))"
+                              FreeTyping
+                              TextField="@(x => x)"
+                              ValueField="@(x => x)"
+                              SelectedValue="@((string)context.CellValue)"
+                              SelectedValueChanged="@(x => context.CellValue = x)">
+                </Autocomplete>
+            </EditTemplate>
+        </DataGridColumn>
         <DataGridSelectColumn Field="@(nameof(Transaction.Type))" Caption="Type" Editable>
             <DisplayTemplate>
                 @context.Type.ToString()
@@ -42,54 +76,54 @@
                         <SelectItem Value="TransactionType.Income">@(TransactionType.Income.ToString())</SelectItem>
                     </Select>
                 </EditTemplate>
-        </DataGridSelectColumn>
-        <DataGridNumericColumn Field="@nameof(Transaction.Value)" Caption="Value" Editable></DataGridNumericColumn>
-        <DataGridNumericColumn Field="@nameof(Transaction.Count)" Caption="Count" Editable></DataGridNumericColumn>
-        <DataGridNumericColumn Field="@nameof(Transaction.TotalValue)" Caption="Total">
-            <DisplayTemplate>
-                @context.TotalValue
-            </DisplayTemplate>
-        </DataGridNumericColumn>
-        <DataGridColumn Field="@(nameof(Transaction.WalletId))" Caption="Wallet" Editable>
-            <DisplayTemplate>
-                @context.Wallet.Name
-            </DisplayTemplate>
-            <EditTemplate>
-                <SelectList TItem="Wallet"
-                        TValue="Guid"
-                        Data="this._wallets"
-                        TextField="@(x => x.Name)"
-                        ValueField="@(x => x.Id)"
-                        SelectedValue="@((Guid)context.CellValue)"
-                        SelectedValueChanged="@(x => context.CellValue = x)"
-                        DefaultItemValue="Guid.Empty"
-                        DefaultItemText="Select wallet"
-                        DefaultItemDisabled=true>
-                </SelectList>
-            </EditTemplate>
-        </DataGridColumn>
-        <DataGridCommandColumn PreventRowClick>
-            <NewCommandTemplate>
-                <Button Color="Color.Success" Clicked="@context.Clicked">@context.LocalizationString</Button>
-            </NewCommandTemplate>
-            <EditCommandTemplate>
-                <Button Color="Color.Primary" Clicked="@context.Clicked">@context.LocalizationString</Button>
-            </EditCommandTemplate>
-            <SaveCommandTemplate>
-                <Button Type="ButtonType.Submit" PreventDefaultOnSubmit Color="Color.Primary" Clicked="context.Clicked">@context.LocalizationString</Button>
-            </SaveCommandTemplate>
-            <DeleteCommandTemplate>
-                <Button Color="Color.Danger" Clicked="@context.Clicked">@context.LocalizationString</Button>
-            </DeleteCommandTemplate>
-            <CancelCommandTemplate>
-                <Button Color="Color.Secondary" Clicked="@context.Clicked">@context.LocalizationString</Button>
-            </CancelCommandTemplate>
-            <ClearFilterCommandTemplate>
-                <Button Color="Color.Warning" Clicked="@context.Clicked">@context.LocalizationString</Button>
-            </ClearFilterCommandTemplate>
-        </DataGridCommandColumn>
-    </DataGridColumns>
-</DataGrid>
+            </DataGridSelectColumn>
+            <DataGridNumericColumn Field="@nameof(Transaction.Value)" Caption="Value" Editable></DataGridNumericColumn>
+            <DataGridNumericColumn Field="@nameof(Transaction.Count)" Caption="Count" Editable></DataGridNumericColumn>
+            <DataGridNumericColumn Field="@nameof(Transaction.TotalValue)" Caption="Total">
+                <DisplayTemplate>
+                    @context.TotalValue
+                </DisplayTemplate>
+            </DataGridNumericColumn>
+            <DataGridColumn Field="@(nameof(Transaction.WalletId))" Caption="Wallet" Editable>
+                <DisplayTemplate>
+                    @context.Wallet.Name
+                </DisplayTemplate>
+                <EditTemplate>
+                    <SelectList TItem="Wallet"
+                            TValue="Guid"
+                            Data="this._wallets"
+                            TextField="@(x => x.Name)"
+                            ValueField="@(x => x.Id)"
+                            SelectedValue="@((Guid)context.CellValue)"
+                            SelectedValueChanged="@(x => context.CellValue = x)"
+                            DefaultItemValue="Guid.Empty"
+                            DefaultItemText="Select wallet"
+                            DefaultItemDisabled=true>
+                    </SelectList>
+                </EditTemplate>
+            </DataGridColumn>
+            <DataGridCommandColumn PreventRowClick>
+                <NewCommandTemplate>
+                    <Button Color="Color.Success" Clicked="@context.Clicked">@context.LocalizationString</Button>
+                </NewCommandTemplate>
+                <EditCommandTemplate>
+                    <Button Color="Color.Primary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+                </EditCommandTemplate>
+                <SaveCommandTemplate>
+                    <Button Type="ButtonType.Submit" PreventDefaultOnSubmit Color="Color.Primary" Clicked="context.Clicked">@context.LocalizationString</Button>
+                </SaveCommandTemplate>
+                <DeleteCommandTemplate>
+                    <Button Color="Color.Danger" Clicked="@context.Clicked">@context.LocalizationString</Button>
+                </DeleteCommandTemplate>
+                <CancelCommandTemplate>
+                    <Button Color="Color.Secondary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+                </CancelCommandTemplate>
+                <ClearFilterCommandTemplate>
+                    <Button Color="Color.Warning" Clicked="@context.Clicked">@context.LocalizationString</Button>
+                </ClearFilterCommandTemplate>
+            </DataGridCommandColumn>
+        </DataGridColumns>
+    </DataGrid>
 
     @code {
     private List<Transaction> _transactions = new();
