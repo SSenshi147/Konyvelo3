@@ -81,7 +81,6 @@
             <DisplayTemplate>
                 @context.Currency.Name
             </DisplayTemplate>
-            @*https://github.com/Megabit/Blazorise/issues/293*@
             <EditTemplate>
                 <SelectList TItem="Currency"
                             TValue="Guid"
@@ -94,12 +93,6 @@
                             DefaultItemText="Select currency"
                             DefaultItemDisabled=true>
                 </SelectList>
-                @*<Select TValue="string" SelectedValue="@((string)context.CellValue)" SelectedValueChanged="@(x => context.CellValue = x)">
-                    @foreach (var item in this._currencies)
-                    {
-                        <SelectItem TValue="string" Value="@item.Id">@item.Name</SelectItem>
-                    }
-                </Select>*@
             </EditTemplate>
         </DataGridColumn>
         <DataGridCommandColumn PreventRowClick>
