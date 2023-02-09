@@ -8,8 +8,17 @@ public class Wallet : Entity
     
     public string Name { get; set; } = string.Empty;
     
-    public double Total { get; set; }
-    public double TotalCalculated => Transactions.Sum(x => x.TotalValue);
+    public decimal Total { get; set; }
+    public decimal TotalCalculated
+    {
+        get
+        {
+            var expenses = Transactions.Where(x => !x.IsDeleted && x.Type == TransactionType.Expense).Sum(x => x.Total);
+            var incomes = Transactions.Where(x => !x.IsDeleted && x.Type == TransactionType.Income).Sum(x => x.Total);
+            var total = incomes - expenses;
+            return total;
+        }
+    }
 
     public List<Transaction> Transactions { get; set; } = new();
 }

@@ -3,6 +3,7 @@
 @using Konyvelo.Logic.Crud.Wallets;
 @using Konyvelo.Logic.Domain;
 @using System.Reflection;
+@using System.Globalization;
 
 <h3>Currencies</h3>
 
@@ -94,6 +95,12 @@
                             DefaultItemDisabled=true>
                 </SelectList>
             </EditTemplate>
+        </DataGridColumn>
+        <DataGridColumn Field="@(nameof(Wallet.Total))" Caption="Total"></DataGridColumn>
+        <DataGridColumn Field="@(nameof(Wallet.TotalCalculated))" Caption="Total calculated">
+            <DisplayTemplate>
+                @context.TotalCalculated.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU"))
+            </DisplayTemplate>
         </DataGridColumn>
         <DataGridCommandColumn PreventRowClick>
             <NewCommandTemplate>

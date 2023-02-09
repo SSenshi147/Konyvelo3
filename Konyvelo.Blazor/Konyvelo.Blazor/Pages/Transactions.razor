@@ -2,6 +2,7 @@
 @using Konyvelo.Logic.Crud.Transactions;
 @using Konyvelo.Logic.Crud.Wallets;
 @using Konyvelo.Logic.Domain;
+@using System.Globalization;
 
 <h3>Transactions</h3>
 
@@ -25,7 +26,7 @@
           RowInserted="this.AddTransaction"
           RowUpdated="this.UpdateTransaction"
           RowRemoved="this.DeleteTransaction"
-          NewItemCreator="() => new Transaction(){Date = DateTime.Today, Count = 1, Type = TransactionType.Expense}">
+          NewItemCreator="() => new Transaction(){Date = DateTime.Today, Type = TransactionType.Expense}">
     <DataGridColumns>
         <DataGridDateColumn Field="@nameof(Transaction.Date)" Caption="Date" Editable>
             <DisplayTemplate>
@@ -77,11 +78,9 @@
                     </Select>
                 </EditTemplate>
             </DataGridSelectColumn>
-            <DataGridNumericColumn Field="@nameof(Transaction.Value)" Caption="Value" Editable></DataGridNumericColumn>
-            <DataGridNumericColumn Field="@nameof(Transaction.Count)" Caption="Count" Editable></DataGridNumericColumn>
-            <DataGridNumericColumn Field="@nameof(Transaction.TotalValue)" Caption="Total">
+            <DataGridNumericColumn Culture="@("hu-HU")" Decimals=2 DecimalSeparator="," Field="@nameof(Transaction.Total)" Caption="Total" Editable>
                 <DisplayTemplate>
-                    @context.TotalValue
+                    @context.Total.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU"))
                 </DisplayTemplate>
             </DataGridNumericColumn>
             <DataGridColumn Field="@(nameof(Transaction.WalletId))" Caption="Wallet" Editable>
@@ -140,6 +139,7 @@
     private async Task LoadTransactions()
     {
         _transactions = await this._mediator.Send(new GetAllTransactionsQuery());
+        _transactions = _transactions.OrderByDescending(x => x.Date).ToList();
     }
 
     private async Task LoadWallets()
