@@ -26,7 +26,8 @@
           RowInserted="this.AddTransaction"
           RowUpdated="this.UpdateTransaction"
           RowRemoved="this.DeleteTransaction"
-          NewItemCreator="() => new Transaction(){Date = DateTime.Today, Type = TransactionType.Expense}">
+          NewItemCreator="() => new Transaction(){Date = DateTime.Today, Type = TransactionType.Expense}"
+          Filterable=true>
     <DataGridColumns>
         <DataGridDateColumn Field="@nameof(Transaction.Date)" Caption="Date" Editable>
             <DisplayTemplate>
@@ -41,11 +42,11 @@
                 <Autocomplete TItem="string"
                               TValue="string"
                               Data="@(_transactions.GroupBy(x => x.Category).Select(x => x.Key))"
-                              FreeTyping
+                              FreeTyping=true
                               TextField="@(x => x)"
                               ValueField="@(x => x)"
-                              SelectedValue="@((string)context.CellValue)"
-                              SelectedValueChanged="@(x => context.CellValue = x)">
+                              Search="@((string)context.CellValue)"
+                              SearchChanged="@(x => context.CellValue = x)">
                 </Autocomplete>
             </EditTemplate>
         </DataGridColumn>
@@ -57,11 +58,11 @@
                 <Autocomplete TItem="string"
                               TValue="string"
                               Data="@(_transactions.GroupBy(x => x.Name).Select(x => x.Key))"
-                              FreeTyping
+                              FreeTyping=true
                               TextField="@(x => x)"
                               ValueField="@(x => x)"
-                              SelectedValue="@((string)context.CellValue)"
-                              SelectedValueChanged="@(x => context.CellValue = x)">
+                              Search="@((string)context.CellValue)"
+                              SearchChanged="@(x => context.CellValue = x)">
                 </Autocomplete>
             </EditTemplate>
         </DataGridColumn>
