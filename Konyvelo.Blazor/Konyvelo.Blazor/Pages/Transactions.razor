@@ -79,11 +79,6 @@
                     </Select>
                 </EditTemplate>
             </DataGridSelectColumn>
-            <DataGridNumericColumn Culture="@("hu-HU")" Decimals=2 DecimalSeparator="," Field="@nameof(Transaction.Total)" Caption="Total" Editable>
-                <DisplayTemplate>
-                    @context.Total.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU"))
-                </DisplayTemplate>
-            </DataGridNumericColumn>
             <DataGridColumn Field="@(nameof(Transaction.WalletId))" Caption="Wallet" Editable>
                 <DisplayTemplate>
                     @context.Wallet.Name
@@ -102,6 +97,11 @@
                     </SelectList>
                 </EditTemplate>
             </DataGridColumn>
+            <DataGridNumericColumn Culture="@("hu-HU")" Decimals=2 DecimalSeparator="," Field="@nameof(Transaction.Total)" Caption="Total" Editable TextAlignment="TextAlignment.End">
+                <DisplayTemplate>
+                    @context.Total.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) @context.Wallet.Currency.Code
+                </DisplayTemplate>
+            </DataGridNumericColumn>
             <DataGridCommandColumn PreventRowClick>
                 <NewCommandTemplate>
                     <Button Color="Color.Success" Clicked="@context.Clicked">@context.LocalizationString</Button>

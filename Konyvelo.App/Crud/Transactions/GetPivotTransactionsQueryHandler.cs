@@ -31,19 +31,10 @@ public class GetPivotTransactionsQueryHandler : IRequestHandler<GetPivotTransact
             })
             .ToList();
 
-        var asd = categories.First().Transactions.GetExpenses();
-        var asd2 = categories.First().Transactions.GetExpensesTotal();
-        var asd3 = categories.First().Transactions.GetIncomes();
-        var asd4 = categories.First().Transactions.GetIncomesTotal();
-        var asd5 = categories.First().Transactions.GetTotal();
-
-
         var response = new PivotTransactionDto()
         {
             PivotTransactions = categories
         };
-
-        ;
 
         return response.AsTaskResult();
     }

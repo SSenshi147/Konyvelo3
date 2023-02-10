@@ -97,9 +97,9 @@
             </EditTemplate>
         </DataGridColumn>
         <DataGridColumn Field="@(nameof(Wallet.Total))" Caption="Total"></DataGridColumn>
-        <DataGridColumn Field="@(nameof(Wallet.TotalCalculated))" Caption="Total calculated">
+        <DataGridColumn Field="@(nameof(Wallet.TotalCalculated))" Caption="Total calculated" TextAlignment="TextAlignment.End">
             <DisplayTemplate>
-                @context.TotalCalculated.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU"))
+                @context.TotalCalculated.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) @context.Currency.Code
             </DisplayTemplate>
         </DataGridColumn>
         <DataGridCommandColumn PreventRowClick>
