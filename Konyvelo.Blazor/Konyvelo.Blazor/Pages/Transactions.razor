@@ -97,7 +97,7 @@
                     </SelectList>
                 </EditTemplate>
             </DataGridColumn>
-            <DataGridNumericColumn Culture="@("hu-HU")" Decimals=2 DecimalSeparator="," Field="@nameof(Transaction.Total)" Caption="Total" Editable TextAlignment="TextAlignment.End">
+            <DataGridNumericColumn Decimals=2 DecimalSeparator="," Field="@nameof(Transaction.Total)" Caption="Total" Editable TextAlignment="TextAlignment.End">
                 <DisplayTemplate>
                     @context.Total.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) @context.Wallet.Currency.Code
                 </DisplayTemplate>
