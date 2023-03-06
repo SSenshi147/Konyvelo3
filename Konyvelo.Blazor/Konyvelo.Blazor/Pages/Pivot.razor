@@ -58,8 +58,12 @@
                     {
                         <TableRowGroup>
                             <TitleTemplate>
-                                <Column Width="Width.Is25">@pivotTransaction.Category</Column>
-                                <Column Width="Width.Is25" TextAlignment="TextAlignment.End">@pivotTransaction.Transactions.GetTotal().ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) HUF</Column>
+                                <Table>
+                                    <TableHeader>
+                                        <TableHeaderCell>@pivotTransaction.Category</TableHeaderCell>
+                                        <TableHeaderCell TextAlignment="TextAlignment.End">@pivotTransaction.Transactions.GetTotal().ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) HUF</TableHeaderCell>
+                                    </TableHeader>
+                                </Table>
                             </TitleTemplate>
                             <ChildContent>
                                 @foreach (var transaction in pivotTransaction.Transactions)
