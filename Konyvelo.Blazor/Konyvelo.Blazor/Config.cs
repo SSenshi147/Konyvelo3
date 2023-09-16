@@ -5,7 +5,6 @@ using Konyvelo.Logic.Crud.Currencies;
 using Konyvelo.Logic.Data;
 using Konyvelo.Logic.Domain;
 using Konyvelo.Logic.Repos;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Konyvelo;
