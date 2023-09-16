@@ -28,7 +28,10 @@ public static class Config
 
     public static void ConfigureMediatr(this WebApplicationBuilder builder)
     {
-        builder.Services.AddMediatR(typeof(CreateCurrencyCommand));
+        builder.Services.AddMediatR(configuration =>
+        {
+            configuration.RegisterServicesFromAssemblyContaining<CreateCurrencyCommand>();
+        });
     }
 
     public static void ConfigureRepos(this WebApplicationBuilder builder)
