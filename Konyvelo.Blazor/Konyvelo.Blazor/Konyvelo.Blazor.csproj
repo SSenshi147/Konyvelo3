@@ -33,4 +33,9 @@
 	  <ProjectReference Include="..\..\Konyvelo.App\Konyvelo.Logic.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <_ContentIncludedByDefault Remove="Components\TodoApp\TodoItem.razor" />
+	  <_ContentIncludedByDefault Remove="Components\TodoApp\TodoItems.razor" />
+	</ItemGroup>
+
 </Project>
