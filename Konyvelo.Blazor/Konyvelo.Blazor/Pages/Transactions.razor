@@ -26,7 +26,7 @@
           RowInserted="this.AddTransaction"
           RowUpdated="this.UpdateTransaction"
           RowRemoved="this.DeleteTransaction"
-          NewItemCreator="() => new Transaction(){Date = DateTime.Today, Type = TransactionType.Expense}"
+          NewItemCreator="() => new Transaction(){Date = DateTime.Today, Type = TransactionType.Expense, WalletId = _wallets.FirstOrDefault().Id}"
           Filterable=true>
     <DataGridColumns>
         <DataGridDateColumn Field="@nameof(Transaction.Date)" Caption="Date" Editable>

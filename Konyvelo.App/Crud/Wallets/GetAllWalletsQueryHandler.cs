@@ -18,6 +18,7 @@ public class GetAllWalletsQueryHandler : GetAllQueryHandler<Wallet, GetAllWallet
             .Include(x => x.Transactions)
             .Include(x => x.Currency)
             .Where(WhereExpression)
+            .OrderBy(x => x.Name)
             .Select(SelectExpression)
             .ToListAsync(cancellationToken);
     }
