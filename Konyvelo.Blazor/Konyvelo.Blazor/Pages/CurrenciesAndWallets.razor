@@ -1,11 +1,14 @@
 ﻿@page "/"
 @using Konyvelo.Logic.Crud.Currencies;
+@using Konyvelo.Logic.Crud.Transactions
 @using Konyvelo.Logic.Crud.Wallets;
 @using Konyvelo.Logic.Domain;
 @using System.Reflection;
 @using System.Globalization;
 
 <h3>Currencies</h3>
+
+@* <Button @onclick=@(async() => await this.Import())>IMPORT</Button> *@
 
 <DataGrid TItem="Currency"
           Data="this._currencies"
@@ -126,7 +129,7 @@
 </DataGrid>
 
 
-@code {
+    @code {
     private List<Currency> _currencies = new();
     private List<Wallet> _wallets = new();
 
@@ -212,5 +215,10 @@
     {
         await _mediator.Send(new DeleteWalletCommand() { Id = wallet.Id });
         await LoadWallets();
+    }
+
+    private async Task Import()
+    {
+        await _mediator.Send(new ImportRequest());
     }
 }
