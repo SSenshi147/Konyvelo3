@@ -13,6 +13,7 @@ public class KonyveloService(KonyveloDbContext context)
     {
         return await context
             .Transactions
+            .Where(x => !x.IsDeleted)
             .Include(x => x.Wallet)
             .ThenInclude(x => x.Currency)
             .ToListAsync(cancellationToken);
