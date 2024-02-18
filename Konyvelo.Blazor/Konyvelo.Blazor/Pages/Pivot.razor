@@ -56,12 +56,12 @@
                 <TableBody>
                     @foreach (var pivotTransaction in this.pivotTransactions)
                     {
-                        <TableRowGroup>
+                        <TableRowGroup Expanded=true>
                             <TitleTemplate>
                                 <Table>
                                     <TableHeader>
                                         <TableHeaderCell>@pivotTransaction.Category</TableHeaderCell>
-                                        <TableHeaderCell TextAlignment="TextAlignment.End">@pivotTransaction.Transactions.GetTotal().ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) HUF</TableHeaderCell>
+                                        @* <TableHeaderCell TextAlignment="TextAlignment.End">@pivotTransaction.Transactions.GetTotal().ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) HUF</TableHeaderCell> *@
                                     </TableHeader>
                                 </Table>
                             </TitleTemplate>
@@ -70,8 +70,8 @@
                                 {
                                     <TableRow @onclick="@(() => this.selectedTransactions = pivotTransaction.Transactions)">
                                         <TableRowCell>@transaction.Name</TableRowCell>
-                                        <TableRowCell TextAlignment="TextAlignment.End">@transaction.Total.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) HUF</TableRowCell>
-                                    </TableRow>
+                                            <TableRowCell TextAlignment="TextAlignment.End">@if (transaction.Type == TransactionType.Expense) { <span>-</span> } @transaction.Total.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) @transaction.Wallet.Currency.Code</TableRowCell>
+                                        </TableRow>
                                 }
                             </ChildContent>
                         </TableRowGroup>
@@ -88,7 +88,7 @@
         </Table>
     </Column>
 </Row>
-@if (!this.selectedTransactions!.IsNullOrEmpty())
+@* @if (!this.selectedTransactions!.IsNullOrEmpty())
 {
     <Table>
         @foreach (var transaction in this.selectedTransactions!)
@@ -99,7 +99,7 @@
             </TableRow>
         }
     </Table>
-}
+} *@
 
 @code {
     private List<PivotTransaction> pivotTransactions = new();
