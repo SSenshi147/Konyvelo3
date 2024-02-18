@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Version>1.2</Version>
+		<Authors>Konyvelo</Authors>
+		<AssemblyName>Konyvelo</AssemblyName>
+		<RootNamespace>Konyvelo</RootNamespace>
+		<PackageId>Konyvelo</PackageId>
+		<Product>Konyvelo</Product>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Blazorise" Version="1.4.2" />
+		<PackageReference Include="Blazorise.Bootstrap" Version="1.4.2" />
+		<PackageReference Include="Blazorise.Components" Version="1.4.2" />
+		<PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.4.2" />
+		<PackageReference Include="Blazorise.DataGrid" Version="1.4.2" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.2" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.2">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\CsharpGoodies\CsharpGoodies.Common\CsharpGoodies.Common.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <_ContentIncludedByDefault Remove="Components\TodoApp\TodoItem.razor" />
+	  <_ContentIncludedByDefault Remove="Components\TodoApp\TodoItems.razor" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="Properties\PublishProfiles\FolderProfile.pubxml" />
+	</ItemGroup>
+
+</Project>

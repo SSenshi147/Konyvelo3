@@ -1,0 +1,178 @@
+﻿@page "/transactions"
+@using Konyvelo.Logic.Domain;
+@using System.Globalization;
+
+<h3>Transactions</h3>
+
+<DataGrid TItem="Transaction"
+          Data="this._transactions"
+          Editable
+          EditMode="DataGridEditMode.Inline"
+          Sortable
+          SortMode="DataGridSortMode.Single"
+          ShowPager
+          ShowPageSizes
+          Resizable
+          Responsive
+          Bordered
+          Hoverable
+          Narrow
+          Groupable
+          ShowGrouping
+          ResizeMode="TableResizeMode.Columns"
+          UseInternalEditing=false
+          RowInserted="this.AddTransaction"
+          RowUpdated="this.UpdateTransaction"
+          RowRemoved="this.DeleteTransaction"
+          NewItemCreator="() => new Transaction(){Date = DateTime.Today, Type = TransactionType.Expense, WalletId = _wallets.FirstOrDefault()?.Id ?? Guid.Empty}"
+          Filterable=true>
+    <DataGridColumns>
+        <DataGridDateColumn Field="@nameof(Transaction.Date)" Caption="Date" Editable>
+            <DisplayTemplate>
+                @(context.Date.ToString("yyyy.MM.dd"))
+            </DisplayTemplate>
+        </DataGridDateColumn>
+        <DataGridColumn Field="@nameof(Transaction.Category)" Caption="Category" Editable>
+            <DisplayTemplate>
+                @context.Category
+            </DisplayTemplate>
+            <EditTemplate>
+                <Autocomplete TItem="string"
+                              TValue="string"
+                              Data="@(_transactions.GroupBy(x => x.Category).Select(x => x.Key))"
+                              FreeTyping=true
+                              TextField="@(x => x)"
+                              ValueField="@(x => x)"
+                              Search="@((string)context.CellValue)"
+                              SearchChanged="@(x => context.CellValue = x)">
+                </Autocomplete>
+            </EditTemplate>
+        </DataGridColumn>
+        <DataGridColumn Field="@nameof(Transaction.Name)" Caption="Name" Editable>
+            <DisplayTemplate>
+                @context.Name
+            </DisplayTemplate>
+            <EditTemplate>
+                <Autocomplete TItem="string"
+                              TValue="string"
+                              Data="@(_transactions.GroupBy(x => x.Name).Select(x => x.Key))"
+                              FreeTyping=true
+                              TextField="@(x => x)"
+                              ValueField="@(x => x)"
+                              Search="@((string)context.CellValue)"
+                              SearchChanged="@(x => context.CellValue = x)">
+                </Autocomplete>
+            </EditTemplate>
+        </DataGridColumn>
+        <DataGridSelectColumn Field="@(nameof(Transaction.Type))" Caption="Type" Editable>
+            <DisplayTemplate>
+                @context.Type.ToString()
+            </DisplayTemplate>
+            <EditTemplate>
+                <Select TValue="TransactionType"
+                        SelectedValue="@((TransactionType)context.CellValue)"
+                        SelectedValueChanged="@(x => context.CellValue = x)">
+                    <SelectItem Value="TransactionType.Expense">@(TransactionType.Expense.ToString())</SelectItem>
+                        <SelectItem Value="TransactionType.Income">@(TransactionType.Income.ToString())</SelectItem>
+                    </Select>
+                </EditTemplate>
+            </DataGridSelectColumn>
+            <DataGridColumn Field="@(nameof(Transaction.WalletId))" Caption="Wallet" Editable>
+                <DisplayTemplate>
+                    @context.Wallet.Name
+                </DisplayTemplate>
+                <EditTemplate>
+                    <SelectList TItem="Wallet"
+                            TValue="Guid"
+                            Data="this._wallets"
+                            TextField="@(x => x.Name)"
+                            ValueField="@(x => x.Id)"
+                            SelectedValue="@((Guid)context.CellValue)"
+                            SelectedValueChanged="@(x => context.CellValue = x)"
+                            DefaultItemValue="Guid.Empty"
+                            DefaultItemText="Select transaction"
+                            DefaultItemDisabled=true>
+                    </SelectList>
+                </EditTemplate>
+            </DataGridColumn>
+            <DataGridNumericColumn Decimals=2 DecimalSeparator="," Field="@nameof(Transaction.Total)" Caption="Total" Editable TextAlignment="TextAlignment.End">
+                <DisplayTemplate>
+                    @context.Total.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) @context.Wallet.Currency.Code
+                </DisplayTemplate>
+            </DataGridNumericColumn>
+            <DataGridCommandColumn PreventRowClick>
+                <NewCommandTemplate>
+                    <Button Color="Color.Success" Clicked="@context.Clicked">@context.LocalizationString</Button>
+                </NewCommandTemplate>
+                <EditCommandTemplate>
+                    <Button Color="Color.Primary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+                </EditCommandTemplate>
+                <SaveCommandTemplate>
+                    <Button Type="ButtonType.Submit" PreventDefaultOnSubmit Color="Color.Primary" Clicked="context.Clicked">@context.LocalizationString</Button>
+                </SaveCommandTemplate>
+                <DeleteCommandTemplate>
+                    <Button Color="Color.Danger" Clicked="@context.Clicked">@context.LocalizationString</Button>
+                </DeleteCommandTemplate>
+                <CancelCommandTemplate>
+                    <Button Color="Color.Secondary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+                </CancelCommandTemplate>
+                <ClearFilterCommandTemplate>
+                    <Button Color="Color.Warning" Clicked="@context.Clicked">@context.LocalizationString</Button>
+                </ClearFilterCommandTemplate>
+            </DataGridCommandColumn>
+        </DataGridColumns>
+    </DataGrid>
+
+    @code {
+    private List<Transaction> _transactions = new();
+    private List<Wallet> _wallets = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        await LoadWallets();
+        await LoadTransactions();
+    }
+
+    private async Task LoadTransactions()
+    {
+        _transactions = await _konyveloService.GetAllTransactions();
+        _transactions = _transactions.OrderByDescending(x => x.Date).ToList();
+    }
+
+    private async Task LoadWallets()
+    {
+        _wallets = await _konyveloService.GetAllWallets();
+    }
+
+    private async Task AddTransaction(SavedRowItem<Transaction, Dictionary<string, object>> savedRowItem)
+    {
+        var transaction = savedRowItem.Item;
+        await _konyveloService.CreateTransaction(transaction);
+
+        await LoadTransactions();
+    }
+
+    private async Task UpdateTransaction(SavedRowItem<Transaction, Dictionary<string, object>> savedRowItem)
+    {
+        var transaction = savedRowItem.Item;
+        var changes = savedRowItem.Values;
+        foreach (var change in changes)
+        {
+            var property = transaction.GetType().GetProperty(change.Key);
+            property?.SetValue(transaction, change.Value);
+        }
+
+        await _konyveloService.UpdateTransaction(transaction);
+        
+        await LoadTransactions();
+    }
+
+    private async Task DeleteTransaction(Transaction transaction)
+    {
+        await _konyveloService.DeleteTransaction(transaction);
+        
+        await LoadTransactions();
+    }
+}

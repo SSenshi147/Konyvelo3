@@ -1,0 +1,201 @@
+﻿@page "/pivot"
+@using CsharpGoodies.Common.Extensions;
+@using Konyvelo.Logic.Domain;
+@using System.Globalization;
+@using Konyvelo.Domain
+@using Konyvelo.Dtos
+
+<h3>Pivot</h3>
+
+<Row VerticalGutter="16">
+
+</Row>
+<Row VerticalGutter="16">
+    <Column ColumnSize="ColumnSize.IsHalf">
+        <Column>
+            <DatePicker TValue="@DateTime"
+                        Date="@this.begin"
+                        DateChanged="@(async x => {this.begin = x; await this.UpdatePivot();})"></DatePicker>
+        </Column>
+        <Column>
+            <DatePicker TValue="@DateTime"
+                        Date="@this.end"
+                        DateChanged="@(async x => {this.end = x; await this.UpdatePivot();})"></DatePicker>
+        </Column>
+        <Column>
+            <Buttons>
+                <Button @onclick=@(async() => await this.PreviousMonth()) Outline=true TextAlignment="TextAlignment.Center" Color="Color.Primary">Previous month</Button>
+                <Button @onclick=@(async() => await this.CurrentMonth()) Outline=true TextAlignment="TextAlignment.Center" Color="Color.Primary">Current month</Button>
+                <Button @onclick=@(async() => await this.NextMonth()) Outline=true TextAlignment="TextAlignment.Center" Color="Color.Primary">Next month</Button>
+            </Buttons>
+        </Column>
+        <Column>
+            <Buttons>
+                <Button @onclick=@(async() => await this.PreviousYear()) Outline=true TextAlignment="TextAlignment.Center" Color="Color.Primary">Previous year</Button>
+                <Button @onclick=@(async() => await this.CurrentYear()) Outline=true TextAlignment="TextAlignment.Center" Color="Color.Primary">Current year</Button>
+                <Button @onclick=@(async() => await this.NextYear()) Outline=true TextAlignment="TextAlignment.Center" Color="Color.Primary">Next year</Button>
+            </Buttons>
+        </Column>
+        <Column>
+            <Button @onclick=@(async() => await this.AllTime()) Outline=true TextAlignment="TextAlignment.Center" Color="Color.Primary">Alltime</Button>
+        </Column>
+    </Column>
+    <Column ColumnSize="ColumnSize.IsHalf">
+        <Table Responsive
+               FixedHeader
+               FixedHeaderTableMaxHeight="800px"
+               FixedHeaderTableHeight="800px">
+            <TableHeader>
+                <TableHeaderCell>Category</TableHeaderCell>
+                <TableHeaderCell TextAlignment="TextAlignment.End">Sum</TableHeaderCell>
+            </TableHeader>
+            @if (!this.pivotTransactions.IsNullOrEmpty())
+            {
+                <TableBody>
+                    @foreach (var pivotTransaction in this.pivotTransactions)
+                    {
+                        <TableRowGroup Expanded=true>
+                            <TitleTemplate>
+                                <Table>
+                                    <TableHeader>
+                                        <TableHeaderCell>@pivotTransaction.Category</TableHeaderCell>
+                                        @* <TableHeaderCell TextAlignment="TextAlignment.End">@pivotTransaction.Transactions.GetTotal().ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) HUF</TableHeaderCell> *@
+                                    </TableHeader>
+                                </Table>
+                            </TitleTemplate>
+                            <ChildContent>
+                                @foreach (var transaction in pivotTransaction.Transactions)
+                                {
+                                    <TableRow @onclick="@(() => this.selectedTransactions = pivotTransaction.Transactions)">
+                                        <TableRowCell>@transaction.Name</TableRowCell>
+                                            <TableRowCell TextAlignment="TextAlignment.End">@if (transaction.Type == TransactionType.Expense) { <span>-</span> } @transaction.Total.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) @transaction.Wallet.Currency.Code</TableRowCell>
+                                        </TableRow>
+                                }
+                            </ChildContent>
+                        </TableRowGroup>
+
+                    }
+                </TableBody>
+                <TableFooter>
+                    <TableRow>
+                        <TableRowCell><b>TOTAL</b></TableRowCell>
+                        <TableRowCell TextAlignment="TextAlignment.End"><b>@this.grandTotal.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) HUF</b></TableRowCell>
+                    </TableRow>
+                </TableFooter>
+            }
+        </Table>
+    </Column>
+</Row>
+@* @if (!this.selectedTransactions!.IsNullOrEmpty())
+{
+    <Table>
+        @foreach (var transaction in this.selectedTransactions!)
+        {
+            <TableRow>
+                <TableRowCell>@transaction.Name</TableRowCell>
+                <TableRowCell>@transaction.Total.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) HUF</TableRowCell>
+            </TableRow>
+        }
+    </Table>
+} *@
+
+@code{
+
+    private List<PivotTransaction> pivotTransactions = new();
+    private DateTime begin = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+
+    private DateTime end = new DateTime(DateTime.Today.Year, DateTime.Today.Month,
+        DateTime.DaysInMonth(DateTime.Today.Year, DateTime.Today.Month));
+
+    private decimal grandTotal;
+    private List<Transaction>? selectedTransactions;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        await UpdatePivot();
+    }
+
+    private async Task UpdatePivot()
+    {
+        var pivot = await _konyveloService.GetPivotTransactions(this.begin, this.end);
+        
+        this.pivotTransactions = pivot.PivotTransactions.Where(x => x.Transactions.GetTotal() != 0)
+            .OrderBy(x => x.Category).ToList();
+        
+        this.grandTotal = this.pivotTransactions.Where(x => x.Transactions.GetTotal() != 0)
+            .Sum(x => x.Transactions.GetTotal());
+    }
+
+    private async Task PreviousMonth()
+    {
+        if (begin.Month == 1)
+        {
+            begin = new(begin.Year - 1, 12, 1);
+            end = new(end.Year - 1, 12, DateTime.DaysInMonth(end.Year - 1, 12));
+        }
+        else
+        {
+            begin = new(begin.Year, begin.Month - 1, 1);
+            end = new(end.Year, end.Month - 1, DateTime.DaysInMonth(end.Year, end.Month - 1));
+        }
+
+        await UpdatePivot();
+    }
+
+    private async Task NextMonth()
+    {
+        if (begin.Month == 12)
+        {
+            begin = new(begin.Year + 1, 1, 1);
+            end = new(end.Year + 1, 1, DateTime.DaysInMonth(end.Year + 1, 1));
+        }
+        else
+        {
+            begin = new(begin.Year, begin.Month + 1, 1);
+            end = new(end.Year, end.Month + 1, DateTime.DaysInMonth(end.Year, end.Month + 1));
+        }
+
+        await UpdatePivot();
+    }
+
+    private async Task AllTime()
+    {
+        var firstDate = await _konyveloService.GetFirstTransactionDate();
+        begin = firstDate;
+        end = new DateTime(DateTime.Today.Year, DateTime.Today.Month,
+            DateTime.DaysInMonth(DateTime.Today.Year, DateTime.Today.Month));
+        await UpdatePivot();
+    }
+
+    private async Task CurrentMonth()
+    {
+        begin = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+        end = new DateTime(DateTime.Today.Year, DateTime.Today.Month,
+            DateTime.DaysInMonth(DateTime.Today.Year, DateTime.Today.Month));
+        await UpdatePivot();
+    }
+
+    private async Task CurrentYear()
+    {
+        begin = new(DateTime.Today.Year, 1, 1);
+        end = new(DateTime.Today.Year, 12, 31);
+        await UpdatePivot();
+    }
+
+    private async Task PreviousYear()
+    {
+        begin = new(begin.Year - 1, 1, 1);
+        end = new(end.Year - 1, 12, 31);
+        await UpdatePivot();
+    }
+
+    private async Task NextYear()
+    {
+        begin = new(begin.Year + 1, 1, 1);
+        end = new(end.Year + 1, 12, 31);
+        await UpdatePivot();
+    }
+
+}

@@ -1,0 +1,211 @@
+﻿@page "/"
+@using Konyvelo.Logic.Domain;
+@using System.Reflection;
+@using System.Globalization;
+
+<h3>Currencies</h3>
+
+@* <Button @onclick=@(async() => await this.Import())>IMPORT</Button> *@
+
+<DataGrid TItem="Currency"
+          Data="this._currencies"
+          Editable
+          EditMode="DataGridEditMode.Inline"
+          Sortable
+          SortMode="DataGridSortMode.Single"
+          ShowPager
+          ShowPageSizes
+          Resizable
+          Responsive
+          Bordered
+          Hoverable
+          Narrow
+          Groupable
+          ShowGrouping
+          ResizeMode="TableResizeMode.Columns"
+          NewItemCreator="() => new Currency()"
+          UseInternalEditing=false
+          RowInserted="this.AddCurrency"
+          RowUpdated="this.UpdateCurrency"
+          RowRemoved="this.DeleteCurrency">
+    <DataGridColumns>
+        <DataGridColumn Field="@nameof(Currency.Name)" Caption="Name" Editable></DataGridColumn>
+        <DataGridColumn Field="@nameof(Currency.Code)" Caption="Code" Editable></DataGridColumn>
+        <DataGridCommandColumn PreventRowClick>
+            <NewCommandTemplate>
+                <Button Color="Color.Success" Clicked="@context.Clicked">@context.LocalizationString</Button>
+            </NewCommandTemplate>
+            <EditCommandTemplate>
+                <Button Color="Color.Primary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+            </EditCommandTemplate>
+            <SaveCommandTemplate>
+                <Button Type="ButtonType.Submit" PreventDefaultOnSubmit Color="Color.Primary" Clicked="context.Clicked">@context.LocalizationString</Button>
+            </SaveCommandTemplate>
+            <DeleteCommandTemplate>
+                <Button Color="Color.Danger" Clicked="@context.Clicked">@context.LocalizationString</Button>
+            </DeleteCommandTemplate>
+            <CancelCommandTemplate>
+                <Button Color="Color.Secondary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+            </CancelCommandTemplate>
+            <ClearFilterCommandTemplate>
+                <Button Color="Color.Warning" Clicked="@context.Clicked">@context.LocalizationString</Button>
+            </ClearFilterCommandTemplate>
+        </DataGridCommandColumn>
+    </DataGridColumns>
+</DataGrid>
+
+<h3>Wallets</h3>
+
+<DataGrid TItem="Wallet"
+          Data="this._wallets"
+          Editable
+          EditMode="DataGridEditMode.Inline"
+          Sortable
+          SortMode="DataGridSortMode.Single"
+          ShowPager
+          ShowPageSizes
+          Resizable
+          Responsive
+          Bordered
+          Hoverable
+          Narrow
+          Groupable
+          ShowGrouping
+          ResizeMode="TableResizeMode.Columns"
+          UseInternalEditing=false
+          RowInserted="this.AddWallet"
+          RowUpdated="this.UpdateWallet"
+          RowRemoved="this.DeleteWallet">
+    <DataGridColumns>
+        <DataGridColumn Field="@nameof(Wallet.Name)" Caption="Name" Editable></DataGridColumn>
+        <DataGridColumn Field="@nameof(Wallet.CurrencyId)" Caption="Currency" Editable>
+            <DisplayTemplate>
+                @context.Currency.Name
+            </DisplayTemplate>
+            <EditTemplate>
+                <SelectList TItem="Currency"
+                            TValue="Guid"
+                            Data="this._currencies"
+                            TextField="@(x => x.Name)"
+                            ValueField="@(x => x.Id)"
+                            SelectedValue="@((Guid)context.CellValue)"
+                            SelectedValueChanged="@(x => context.CellValue = x)"
+                            DefaultItemValue="Guid.Empty"
+                            DefaultItemText="Select wallet"
+                            DefaultItemDisabled=true>
+                </SelectList>
+            </EditTemplate>
+        </DataGridColumn>
+        <DataGridColumn Field="@(nameof(Wallet.Total))" Caption="Total"></DataGridColumn>
+        <DataGridColumn Field="@(nameof(Wallet.TotalCalculated))" Caption="Total calculated" TextAlignment="TextAlignment.End">
+            <DisplayTemplate>
+                @context.TotalCalculated.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) @context.Currency.Code
+            </DisplayTemplate>
+        </DataGridColumn>
+        <DataGridCommandColumn PreventRowClick>
+            <NewCommandTemplate>
+                <Button Color="Color.Success" Clicked="@context.Clicked">@context.LocalizationString</Button>
+            </NewCommandTemplate>
+            <EditCommandTemplate>
+                <Button Color="Color.Primary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+            </EditCommandTemplate>
+            <SaveCommandTemplate>
+                <Button Type="ButtonType.Submit" PreventDefaultOnSubmit Color="Color.Primary" Clicked="context.Clicked">@context.LocalizationString</Button>
+            </SaveCommandTemplate>
+            <DeleteCommandTemplate>
+                <Button Color="Color.Danger" Clicked="@context.Clicked">@context.LocalizationString</Button>
+            </DeleteCommandTemplate>
+            <CancelCommandTemplate>
+                <Button Color="Color.Secondary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+            </CancelCommandTemplate>
+            <ClearFilterCommandTemplate>
+                <Button Color="Color.Warning" Clicked="@context.Clicked">@context.LocalizationString</Button>
+            </ClearFilterCommandTemplate>
+        </DataGridCommandColumn>
+    </DataGridColumns>
+</DataGrid>
+
+@code
+{
+    private List<Currency> _currencies = new();
+    private List<Wallet> _wallets = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        await LoadCurrencies();
+        await LoadWallets();
+    }
+
+    private async Task LoadCurrencies()
+    {
+        _currencies = await _konyveloService.GetAllCurrencies();
+    }
+
+    private async Task LoadWallets()
+    {
+        _wallets = await _konyveloService.GetAllWallets();
+    }
+
+    private async Task AddCurrency(SavedRowItem<Currency, Dictionary<string, object>> savedRowItem)
+    {
+        var currency = savedRowItem.Item;
+        await _konyveloService.CreateCurrency(currency);
+
+        await LoadCurrencies();
+    }
+
+    private async Task AddWallet(SavedRowItem<Wallet, Dictionary<string, object>> savedRowItem)
+    {
+        var wallet = savedRowItem.Item;
+        await _konyveloService.CreateWallet(wallet);
+
+        await LoadWallets();
+    }
+
+    private async Task UpdateCurrency(SavedRowItem<Currency, Dictionary<string, object>> savedRowItem)
+    {
+        var currency = savedRowItem.Item;
+        var changes = savedRowItem.Values;
+        foreach (var change in changes)
+        {
+            var property = currency.GetType().GetProperty(change.Key);
+            property?.SetValue(currency, change.Value);
+        }
+
+        await _konyveloService.UpdateCurrency(currency);
+        await LoadCurrencies();
+    }
+
+    private async Task UpdateWallet(SavedRowItem<Wallet, Dictionary<string, object>> savedRowItem)
+    {
+        var wallet = savedRowItem.Item;
+        var changes = savedRowItem.Values;
+        foreach (var change in changes)
+        {
+            var property = wallet.GetType().GetProperty(change.Key);
+            property?.SetValue(wallet, change.Value);
+        }
+
+        await _konyveloService.UpdateWallet(wallet);
+        await LoadWallets();
+    }
+
+    private async Task DeleteCurrency(Currency currency)
+    {
+        await _konyveloService.DeleteCurrency(currency);
+        await LoadCurrencies();
+    }
+
+    private async Task DeleteWallet(Wallet wallet)
+    {
+        await _konyveloService.DeleteWallet(wallet);
+        await LoadWallets();
+    }
+
+    // private async Task Import()
+    // {
+    //     await _mediator.Send(new ImportRequest());
+    // }
+}

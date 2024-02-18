@@ -1,0 +1,45 @@
+﻿@using Konyvelo.Components.Layout
+@inherits LayoutComponentBase
+
+<Layout Sider>
+    <LayoutSider>
+        <LayoutSiderContent>
+            <SideMenu />
+        </LayoutSiderContent>
+    </LayoutSider>
+    <Layout>
+        <LayoutContent Padding="Padding.Is4.OnX.Is4.FromTop">
+            @Body
+        </LayoutContent>
+    </Layout>
+</Layout>
+
+@* @if ( layoutType == "fixed-header" )
+{
+    
+}
+else if ( layoutType == "fixed-header-footer-only" )
+{
+    <Layout>
+        <LayoutContent Padding="Padding.Is4.OnX.Is4.FromTop">
+            @Body
+        </LayoutContent>
+    </Layout>
+}
+else if ( layoutType == "sider-with-header-on-top" )
+{
+    <Layout>
+        <Layout Sider>
+            <LayoutSider>
+                <LayoutSiderContent>
+                    <SideMenu />
+                </LayoutSiderContent>
+            </LayoutSider>
+            <Layout>
+                <LayoutContent Padding="Padding.Is4.OnX.Is4.FromTop">
+                    @Body
+                </LayoutContent>
+            </Layout>
+        </Layout>
+    </Layout>
+} *@
