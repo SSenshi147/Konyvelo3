@@ -15,8 +15,8 @@ public class Wallet : Entity
     {
         get
         {
-            var expenses = Transactions.Where(x => x.Type == TransactionType.Expense).Sum(x => x.Total);
-            var incomes = Transactions.Where(x => x.Type == TransactionType.Income).Sum(x => x.Total);
+            var expenses = Transactions.Where(x => !x.IsDeleted && x.Type == TransactionType.Expense).Sum(x => x.Total);
+            var incomes = Transactions.Where(x => !x.IsDeleted && x.Type == TransactionType.Income).Sum(x => x.Total);
             var total = incomes - expenses;
             return total;
         }
