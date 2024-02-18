@@ -1,4 +1,4 @@
-using Konyvelo.Logic.Domain;
+using Konyvelo.Domain;
 
 namespace Konyvelo.Dtos;
 

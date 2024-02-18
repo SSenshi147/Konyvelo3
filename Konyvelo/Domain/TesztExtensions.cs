@@ -1,5 +1,3 @@
-using Konyvelo.Logic.Domain;
-
 namespace Konyvelo.Domain;
 
 public static class TesztExtensions

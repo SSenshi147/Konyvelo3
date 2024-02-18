@@ -1,7 +1,7 @@
-﻿using Konyvelo.Logic.Domain;
+﻿using Konyvelo.Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace Konyvelo.Logic.Data;
+namespace Konyvelo.Data;
 public class KonyveloDbContext : DbContext
 {
     public DbSet<Currency> Currencies { get; set; }

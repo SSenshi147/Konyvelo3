@@ -1,7 +1,7 @@
 using CsharpGoodies.Common.Extensions;
+using Konyvelo.Data;
+using Konyvelo.Domain;
 using Konyvelo.Dtos;
-using Konyvelo.Logic.Data;
-using Konyvelo.Logic.Domain;
 using Konyvelo.Pages;
 using Microsoft.EntityFrameworkCore;
 

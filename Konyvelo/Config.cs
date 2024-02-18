@@ -1,6 +1,6 @@
 ﻿using Blazorise.Bootstrap;
 using Blazorise.Icons.FontAwesome;
-using Konyvelo.Logic.Data;
+using Konyvelo.Data;
 using Konyvelo.Services;
 using Microsoft.EntityFrameworkCore;
 

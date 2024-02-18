@@ -1,4 +1,4 @@
-﻿namespace Konyvelo.Logic.Domain;
+﻿namespace Konyvelo.Domain;
 public enum TransactionType
 {
     Income,
