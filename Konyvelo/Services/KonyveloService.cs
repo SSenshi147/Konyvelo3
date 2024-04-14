@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Konyvelo.Services;
 
-public class KonyveloService(KonyveloDbContext context)
+public class KonyveloService(KonyveloDbContext context, IConfiguration configuration)
 {
     public async Task<List<Transaction>> GetAllTransactions(CancellationToken cancellationToken = default)
     {
@@ -128,6 +128,21 @@ public class KonyveloService(KonyveloDbContext context)
         transaction.Delete();
         context.Transactions.Update(transaction);
         await context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task Export()
+    {
+        var path = configuration["ExportCsv"] ?? throw new Exception("export not found");
+        var alltrans = await context.Transactions.ToListAsync();
+        var sw = new StreamWriter(path);
+        foreach (var transaction in alltrans)
+        {
+            var sum = transaction.Type == TransactionType.Expense
+                ? -Math.Abs(transaction.Total)
+                : Math.Abs(transaction.Total); 
+            await sw.WriteLineAsync($"{transaction.Date:yyyy-MM-dd};{transaction.Category};{transaction.Name};{sum};{transaction.Wallet.Currency.Code};{transaction.Wallet.Name}");
+        }
+        sw.Close();
     }
 
     // public async Task Import()

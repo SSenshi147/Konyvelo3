@@ -6,6 +6,7 @@
 <h3>Currencies</h3>
 
 @* <Button @onclick=@(async() => await this.Import())>IMPORT</Button> *@
+<Button @onclick=@(async() => await this.Export())>EXPORT</Button>
 
 <DataGrid TItem="Currency"
           Data="this._currencies"
@@ -208,4 +209,9 @@
     // {
     //     await _mediator.Send(new ImportRequest());
     // }
+
+    private async Task Export()
+    {
+        await _konyveloService.Export();
+    }
 }
