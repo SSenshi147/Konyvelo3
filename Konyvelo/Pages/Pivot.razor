@@ -12,12 +12,12 @@
 <Row VerticalGutter="16">
     <Column ColumnSize="ColumnSize.IsHalf">
         <Column>
-            <DatePicker TValue="@DateTime"
+            <DatePicker TValue="@DateOnly"
                         Date="@this.begin"
                         DateChanged="@(async x => {this.begin = x; await this.UpdatePivot();})"></DatePicker>
         </Column>
         <Column>
-            <DatePicker TValue="@DateTime"
+            <DatePicker TValue="@DateOnly"
                         Date="@this.end"
                         DateChanged="@(async x => {this.end = x; await this.UpdatePivot();})"></DatePicker>
         </Column>
@@ -66,8 +66,8 @@
                                 @foreach (var transaction in pivotTransaction.Transactions)
                                 {
                                     <TableRow @onclick="@(() => this.selectedTransactions = pivotTransaction.Transactions)">
-                                        <TableRowCell>@transaction.Name</TableRowCell>
-                                            <TableRowCell TextAlignment="TextAlignment.End">@if (transaction.Type == TransactionType.Expense) { <span>-</span> } @transaction.Total.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) @transaction.Wallet.Currency.Code</TableRowCell>
+                                        <TableRowCell>@transaction.Info</TableRowCell>
+                                            <TableRowCell TextAlignment="TextAlignment.End"> @transaction.Total.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) @transaction.Account.Currency.Code</TableRowCell>
                                         </TableRow>
                                 }
                             </ChildContent>
@@ -101,9 +101,9 @@
 @code{
 
     private List<PivotTransaction> pivotTransactions = new();
-    private DateTime begin = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+    private DateOnly begin = new DateOnly(DateTime.Today.Year, DateTime.Today.Month, 1);
 
-    private DateTime end = new DateTime(DateTime.Today.Year, DateTime.Today.Month,
+    private DateOnly end = new DateOnly(DateTime.Today.Year, DateTime.Today.Month,
         DateTime.DaysInMonth(DateTime.Today.Year, DateTime.Today.Month));
 
     private decimal grandTotal;
@@ -163,15 +163,15 @@
     {
         var firstDate = await _konyveloService.GetFirstTransactionDate();
         begin = firstDate;
-        end = new DateTime(DateTime.Today.Year, DateTime.Today.Month,
+        end = new DateOnly(DateTime.Today.Year, DateTime.Today.Month,
             DateTime.DaysInMonth(DateTime.Today.Year, DateTime.Today.Month));
         await UpdatePivot();
     }
 
     private async Task CurrentMonth()
     {
-        begin = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
-        end = new DateTime(DateTime.Today.Year, DateTime.Today.Month,
+        begin = new DateOnly(DateTime.Today.Year, DateTime.Today.Month, 1);
+        end = new DateOnly(DateTime.Today.Year, DateTime.Today.Month,
             DateTime.DaysInMonth(DateTime.Today.Year, DateTime.Today.Month));
         await UpdatePivot();
     }

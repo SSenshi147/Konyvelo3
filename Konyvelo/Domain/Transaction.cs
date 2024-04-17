@@ -1,18 +1,20 @@
-﻿using CsharpGoodies.Common.Domain;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Konyvelo.Domain;
+
+[Table("transactions")]
 public class Transaction : Entity
 {
-    public DateTime Date { get; set; }
-    
+    [Column("category")]
     public string Category { get; set; } = string.Empty;
-    
-    public string? Name { get; set; } = string.Empty;
-    
-    public TransactionType Type { get; set; }
-    
+    [Column("info")]
+    public string? Info { get; set; }
+    [Column("date")]
+    public DateOnly Date { get; set; }
+    [Column("total")]
     public decimal Total { get; set; }
 
-    public Guid WalletId { get; set; }
-    public Wallet Wallet { get; set; } = default!;
+    public Account Account { get; set; } = new();
+    [Column("account_id")]
+    public int AccountId { get; set; }
 }

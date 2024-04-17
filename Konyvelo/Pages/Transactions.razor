@@ -24,7 +24,7 @@
           RowInserted="this.AddTransaction"
           RowUpdated="this.UpdateTransaction"
           RowRemoved="this.DeleteTransaction"
-          NewItemCreator="() => new Transaction(){Date = DateTime.Today, Type = TransactionType.Expense, WalletId = _wallets.FirstOrDefault()?.Id ?? Guid.Empty}"
+          NewItemCreator="() => new Transaction(){Date = new DateOnly(), AccountId = _wallets.FirstOrDefault()?.Id ?? 0}"
           Filterable=true>
     <DataGridColumns>
         <DataGridDateColumn Field="@nameof(Transaction.Date)" Caption="Date" Editable>
@@ -48,14 +48,14 @@
                 </Autocomplete>
             </EditTemplate>
         </DataGridColumn>
-        <DataGridColumn Field="@nameof(Transaction.Name)" Caption="Name" Editable>
+        <DataGridColumn Field="@nameof(Transaction.Info)" Caption="Name" Editable>
             <DisplayTemplate>
-                @context.Name
+                @context.Info
             </DisplayTemplate>
             <EditTemplate>
                 <Autocomplete TItem="string"
                               TValue="string"
-                              Data="@(_transactions.GroupBy(x => x.Name).Select(x => x.Key))"
+                              Data="@(_transactions.GroupBy(x => x.Info).Select(x => x.Key))"
                               FreeTyping=true
                               TextField="@(x => x)"
                               ValueField="@(x => x)"
@@ -64,32 +64,19 @@
                 </Autocomplete>
             </EditTemplate>
         </DataGridColumn>
-        <DataGridSelectColumn Field="@(nameof(Transaction.Type))" Caption="Type" Editable>
-            <DisplayTemplate>
-                @context.Type.ToString()
-            </DisplayTemplate>
-            <EditTemplate>
-                <Select TValue="TransactionType"
-                        SelectedValue="@((TransactionType)context.CellValue)"
-                        SelectedValueChanged="@(x => context.CellValue = x)">
-                    <SelectItem Value="TransactionType.Expense">@(TransactionType.Expense.ToString())</SelectItem>
-                        <SelectItem Value="TransactionType.Income">@(TransactionType.Income.ToString())</SelectItem>
-                    </Select>
-                </EditTemplate>
-            </DataGridSelectColumn>
-            <DataGridColumn Field="@(nameof(Transaction.WalletId))" Caption="Wallet" Editable>
+            <DataGridColumn Field="@(nameof(Transaction.AccountId))" Caption="Account" Editable>
                 <DisplayTemplate>
-                    @context.Wallet.Name
+                    @context.Account.Name
                 </DisplayTemplate>
                 <EditTemplate>
-                    <SelectList TItem="Wallet"
-                            TValue="Guid"
+                    <SelectList TItem="Account"
+                            TValue="int"
                             Data="this._wallets"
                             TextField="@(x => x.Name)"
                             ValueField="@(x => x.Id)"
-                            SelectedValue="@((Guid)context.CellValue)"
+                            SelectedValue="@((int)context.CellValue)"
                             SelectedValueChanged="@(x => context.CellValue = x)"
-                            DefaultItemValue="Guid.Empty"
+                            DefaultItemValue="0"
                             DefaultItemText="Select transaction"
                             DefaultItemDisabled=true>
                     </SelectList>
@@ -97,7 +84,7 @@
             </DataGridColumn>
             <DataGridNumericColumn Decimals=2 DecimalSeparator="," Field="@nameof(Transaction.Total)" Caption="Total" Editable TextAlignment="TextAlignment.End">
                 <DisplayTemplate>
-                    @context.Total.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) @context.Wallet.Currency.Code
+                    @context.Total.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) @context.Account.Currency.Code
                 </DisplayTemplate>
             </DataGridNumericColumn>
             <DataGridCommandColumn PreventRowClick>
@@ -125,7 +112,7 @@
 
     @code {
     private List<Transaction> _transactions = new();
-    private List<Wallet> _wallets = new();
+    private List<Account> _wallets = new();
 
     protected override async Task OnInitializedAsync()
     {

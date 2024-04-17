@@ -3,6 +3,7 @@ using System;
 using Konyvelo.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Konyvelo.Logic.Migrations
 {
     [DbContext(typeof(KonyveloDbContext))]
-    partial class KonyveloDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240417170428_remove_old")]
+    partial class remove_old
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.4");
@@ -33,6 +36,10 @@ namespace Konyvelo.Logic.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("name");
 
+                    b.Property<string>("OldId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CurrencyId");
@@ -51,6 +58,10 @@ namespace Konyvelo.Logic.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnName("code");
+
+                    b.Property<string>("OldId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -80,6 +91,10 @@ namespace Konyvelo.Logic.Migrations
                     b.Property<string>("Info")
                         .HasColumnType("TEXT")
                         .HasColumnName("info");
+
+                    b.Property<string>("OldId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<decimal>("Total")
                         .HasColumnType("TEXT")

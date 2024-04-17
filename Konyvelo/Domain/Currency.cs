@@ -1,10 +1,14 @@
-﻿using CsharpGoodies.Common.Domain;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Konyvelo.Domain;
+
+[Table("currencies")]
 public class Currency : Entity
 {
-    public string Name { get; set; } = string.Empty;
+    [Column("code")]
     public string Code { get; set; } = string.Empty;
 
-    public List<Wallet> Wallets { get; set; } = new();
+    public List<Account> Accounts { get; set; } = [];
+
+    public decimal Total => Accounts.Sum(x => x.Total);
 }

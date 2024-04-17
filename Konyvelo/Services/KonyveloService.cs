@@ -13,13 +13,12 @@ public class KonyveloService(KonyveloDbContext context)
     {
         return await context
             .Transactions
-            .Where(x => !x.IsDeleted)
-            .Include(x => x.Wallet)
+            .Include(x => x.Account)
             .ThenInclude(x => x.Currency)
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<DateTime> GetFirstTransactionDate(CancellationToken cancellationToken = default)
+    public async Task<DateOnly> GetFirstTransactionDate(CancellationToken cancellationToken = default)
     {
         var query = await context
             .Transactions
@@ -29,7 +28,7 @@ public class KonyveloService(KonyveloDbContext context)
         return query.Date;
     }
 
-    public async Task<PivotTransactionDto> GetPivotTransactions(DateTime begindate, DateTime endDate,
+    public async Task<PivotTransactionDto> GetPivotTransactions(DateOnly begindate, DateOnly endDate,
         CancellationToken cancellationToken = default)
     {
         var transactions = await context.Transactions.ToListAsync(cancellationToken);
@@ -52,7 +51,7 @@ public class KonyveloService(KonyveloDbContext context)
         return response;
     }
 
-    public async Task<List<Wallet>> GetAllWallets(CancellationToken cancellationToken = default)
+    public async Task<List<Account>> GetAllWallets(CancellationToken cancellationToken = default)
     {
         return await context
             .Wallets
@@ -69,64 +68,55 @@ public class KonyveloService(KonyveloDbContext context)
 
     public async Task CreateCurrency(Currency currency, CancellationToken cancellationToken = default)
     {
-        currency.CreateNow();
         await context.Currencies.AddAsync(currency, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task CreateWallet(Wallet wallet, CancellationToken cancellationToken = default)
+    public async Task CreateWallet(Account account, CancellationToken cancellationToken = default)
     {
-        wallet.CreateNow();
-        await context.Wallets.AddAsync(wallet, cancellationToken);
+        await context.Wallets.AddAsync(account, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task UpdateCurrency(Currency currency, CancellationToken cancellationToken = default)
     {
-        currency.UpdateNow();
         context.Currencies.Update(currency);
         await context.SaveChangesAsync(cancellationToken);
     }
-    
-    public async Task UpdateWallet(Wallet wallet, CancellationToken cancellationToken = default)
+
+    public async Task UpdateWallet(Account account, CancellationToken cancellationToken = default)
     {
-        wallet.UpdateNow();
-        context.Wallets.Update(wallet);
+        context.Wallets.Update(account);
         await context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task DeleteCurrency(Currency currency, CancellationToken cancellationToken = default)
     {
-        currency.Delete();
-        context.Currencies.Update(currency);
+        context.Currencies.Remove(currency);
         await context.SaveChangesAsync(cancellationToken);
     }
-    
-    public async Task DeleteWallet(Wallet wallet, CancellationToken cancellationToken = default)
+
+    public async Task DeleteWallet(Account account, CancellationToken cancellationToken = default)
     {
-        wallet.Delete();
-        context.Wallets.Update(wallet);
+        context.Wallets.Remove(account);
         await context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task CreateTransaction(Transaction transaction, CancellationToken cancellationToken = default)
     {
-        transaction.CreateNow();
         await context.Transactions.AddAsync(transaction, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
     }
-    
+
     public async Task UpdateTransaction(Transaction transaction, CancellationToken cancellationToken = default)
     {
-        transaction.UpdateNow();
         context.Transactions.Update(transaction);
         await context.SaveChangesAsync(cancellationToken);
     }
-    
+
     public async Task DeleteTransaction(Transaction transaction, CancellationToken cancellationToken = default)
     {
-        transaction.Delete();
-        context.Transactions.Update(transaction);
+        context.Transactions.Remove(transaction);
         await context.SaveChangesAsync(cancellationToken);
     }
 

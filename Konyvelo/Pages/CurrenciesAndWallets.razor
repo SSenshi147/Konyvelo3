@@ -29,7 +29,6 @@
           RowUpdated="this.UpdateCurrency"
           RowRemoved="this.DeleteCurrency">
     <DataGridColumns>
-        <DataGridColumn Field="@nameof(Currency.Name)" Caption="Name" Editable></DataGridColumn>
         <DataGridColumn Field="@nameof(Currency.Code)" Caption="Code" Editable></DataGridColumn>
         <DataGridCommandColumn PreventRowClick>
             <NewCommandTemplate>
@@ -54,9 +53,9 @@
     </DataGridColumns>
 </DataGrid>
 
-<h3>Wallets</h3>
+<h3>Accounts</h3>
 
-<DataGrid TItem="Wallet"
+<DataGrid TItem="Account"
           Data="this._wallets"
           Editable
           EditMode="DataGridEditMode.Inline"
@@ -77,29 +76,28 @@
           RowUpdated="this.UpdateWallet"
           RowRemoved="this.DeleteWallet">
     <DataGridColumns>
-        <DataGridColumn Field="@nameof(Wallet.Name)" Caption="Name" Editable></DataGridColumn>
-        <DataGridColumn Field="@nameof(Wallet.CurrencyId)" Caption="Currency" Editable>
+        <DataGridColumn Field="@nameof(Account.Name)" Caption="Name" Editable></DataGridColumn>
+        <DataGridColumn Field="@nameof(Account.CurrencyId)" Caption="Currency" Editable>
             <DisplayTemplate>
-                @context.Currency.Name
+                @context.Currency.Code
             </DisplayTemplate>
             <EditTemplate>
                 <SelectList TItem="Currency"
-                            TValue="Guid"
+                            TValue="int"
                             Data="this._currencies"
-                            TextField="@(x => x.Name)"
+                            TextField="@(x => x.Code)"
                             ValueField="@(x => x.Id)"
-                            SelectedValue="@((Guid)context.CellValue)"
+                            SelectedValue="@((int)context.CellValue)"
                             SelectedValueChanged="@(x => context.CellValue = x)"
-                            DefaultItemValue="Guid.Empty"
+                            DefaultItemValue="0"
                             DefaultItemText="Select wallet"
                             DefaultItemDisabled=true>
                 </SelectList>
             </EditTemplate>
         </DataGridColumn>
-        <DataGridColumn Field="@(nameof(Wallet.Total))" Caption="Total"></DataGridColumn>
-        <DataGridColumn Field="@(nameof(Wallet.TotalCalculated))" Caption="Total calculated" TextAlignment="TextAlignment.End">
+        <DataGridColumn Field="@(nameof(Account.Total))" Caption="Total calculated" TextAlignment="TextAlignment.End">
             <DisplayTemplate>
-                @context.TotalCalculated.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) @context.Currency.Code
+                @context.Total.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) @context.Currency.Code
             </DisplayTemplate>
         </DataGridColumn>
         <DataGridCommandColumn PreventRowClick>
@@ -128,7 +126,7 @@
 @code
 {
     private List<Currency> _currencies = new();
-    private List<Wallet> _wallets = new();
+    private List<Account> _wallets = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -156,7 +154,7 @@
         await LoadCurrencies();
     }
 
-    private async Task AddWallet(SavedRowItem<Wallet, Dictionary<string, object>> savedRowItem)
+    private async Task AddWallet(SavedRowItem<Account, Dictionary<string, object>> savedRowItem)
     {
         var wallet = savedRowItem.Item;
         await _konyveloService.CreateWallet(wallet);
@@ -178,7 +176,7 @@
         await LoadCurrencies();
     }
 
-    private async Task UpdateWallet(SavedRowItem<Wallet, Dictionary<string, object>> savedRowItem)
+    private async Task UpdateWallet(SavedRowItem<Account, Dictionary<string, object>> savedRowItem)
     {
         var wallet = savedRowItem.Item;
         var changes = savedRowItem.Values;
@@ -198,14 +196,13 @@
         await LoadCurrencies();
     }
 
-    private async Task DeleteWallet(Wallet wallet)
+    private async Task DeleteWallet(Account account)
     {
-        await _konyveloService.DeleteWallet(wallet);
+        await _konyveloService.DeleteWallet(account);
         await LoadWallets();
     }
 
-    // private async Task Import()
-    // {
-    //     await _mediator.Send(new ImportRequest());
-    // }
+    private async Task Import()
+    {
+    }
 }

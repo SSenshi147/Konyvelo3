@@ -3,6 +3,7 @@ using System;
 using Konyvelo.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Konyvelo.Logic.Migrations
 {
     [DbContext(typeof(KonyveloDbContext))]
-    partial class KonyveloDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240417171204_remove_old_id")]
+    partial class remove_old_id
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.4");
