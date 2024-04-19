@@ -24,7 +24,7 @@
           RowInserted="this.AddTransaction"
           RowUpdated="this.UpdateTransaction"
           RowRemoved="this.DeleteTransaction"
-          NewItemCreator="() => new Transaction(){Date = new DateOnly(), AccountId = _wallets.FirstOrDefault()?.Id ?? 0}"
+          NewItemCreator="() => new Transaction(){Date = new DateOnly(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day), AccountId = _wallets.FirstOrDefault()?.Id ?? 0}"
           Filterable=true>
     <DataGridColumns>
         <DataGridDateColumn Field="@nameof(Transaction.Date)" Caption="Date" Editable>
@@ -136,7 +136,7 @@
     private async Task AddTransaction(SavedRowItem<Transaction, Dictionary<string, object>> savedRowItem)
     {
         var transaction = savedRowItem.Item;
-        await _konyveloService.CreateTransaction(transaction);
+        await _konyveloService.CreateTransaction(new CreateTransactionModel(transaction.AccountId, transaction.Category, transaction.Total, transaction.Date, transaction.Info));
 
         await LoadTransactions();
     }

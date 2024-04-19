@@ -2,12 +2,12 @@ using CsharpGoodies.Common.Extensions;
 using Konyvelo.Data;
 using Konyvelo.Domain;
 using Konyvelo.Dtos;
-using Konyvelo.Pages;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 namespace Konyvelo.Services;
 
-public class KonyveloService(KonyveloDbContext context)
+public class KonyveloService(KonyveloDbContext context, IConfiguration configuration)
 {
     public async Task<List<Transaction>> GetAllTransactions(CancellationToken cancellationToken = default)
     {
@@ -102,10 +102,43 @@ public class KonyveloService(KonyveloDbContext context)
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task CreateTransaction(Transaction transaction, CancellationToken cancellationToken = default)
+    public async Task CreateTransaction(CreateTransactionModel transaction, CancellationToken cancellationToken = default)
     {
-        await context.Transactions.AddAsync(transaction, cancellationToken);
-        await context.SaveChangesAsync(cancellationToken);
+        if (transaction is null) throw new ArgumentNullException(nameof(transaction));
+        if (transaction.AccountId < 1) throw new ArgumentOutOfRangeException(nameof(transaction.AccountId));
+        if (transaction.Category.IsNullOrEmpty()) throw new ArgumentException(nameof(transaction.Category));
+        
+        await using var connection = new SqliteConnection(configuration["SqliteConnectionString"]);
+        connection.Open();
+        await using var command = connection.CreateCommand();
+        command.CommandText = "insert into transactions (account_id, category, date, info, total) values (@AccountValue, @CategoryValue, @DateValue, @InfoValue, @TotalValue)";
+
+        var account_id = command.CreateParameter();
+        account_id.ParameterName = "AccountValue";
+        account_id.Value = transaction.AccountId;
+        command.Parameters.Add(account_id);
+
+        var category =  command.CreateParameter();
+        category.ParameterName = "CategoryValue";
+        category.Value = transaction.Category;
+        command.Parameters.Add(category);
+
+        var date = command.CreateParameter();
+        date.ParameterName = "DateValue";
+        date.Value = transaction.Date.ToString("yyyy-MM-dd");
+        command.Parameters.Add(date);
+
+        var info = command.CreateParameter();
+        info.ParameterName = "InfoValue";
+        info.Value = transaction.Info;
+        command.Parameters.Add(info);
+
+        var total  = command.CreateParameter();
+        total.ParameterName = "TotalValue";
+        total.Value = transaction.Total;
+        command.Parameters.Add(total);
+
+        await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
     public async Task UpdateTransaction(Transaction transaction, CancellationToken cancellationToken = default)
@@ -146,3 +179,5 @@ public class KonyveloService(KonyveloDbContext context)
     //await crudRepo.SaveChangesAsync(cancellationToken);
     // }
 }
+
+public record CreateTransactionModel(int AccountId, string Category, decimal Total, DateOnly Date, string? Info);
