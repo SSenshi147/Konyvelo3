@@ -11,6 +11,7 @@ public interface IKonyveloCrudService
     Task CreateAccountAsync(CreateAccountModel model);
     Task<List<GetCurrencyModel>> GetCurrenciesAsync();
     Task<List<GetAccountModel>> GetAccountsAsync();
+    Task<List<GetAccountWithCurrencyModel>> GetAccountsWithCurrency();
 }
 
 public record CreateCurrencyModel(string Code);
@@ -22,11 +23,19 @@ public record GetCurrencyModel
 }
 
 public record CreateAccountModel(string Name, int CurrencyId);
-public class GetAccountModel
+public record GetAccountModel
 {
     public int Id { get; init; }
     public string Name { get; init; } = string.Empty;
     public int CurrencyId { get; init; }
+}
+
+public record GetAccountWithCurrencyModel
+{
+    public int Id { get; init; }
+    public string Name { get; init; }
+    public int CurrencyId { get; init; }
+    public string Code { get; init; }
 }
 
 public class KonyveloCrudService(string dbConnectionString) : IKonyveloCrudService
@@ -121,5 +130,15 @@ public class KonyveloCrudService(string dbConnectionString) : IKonyveloCrudServi
         await using var connection = GetConnection();
 
         return (await connection.QueryAsync<GetAccountModel>("select id, name, currency_id as CurrencyId from accounts")).ToList();
+    }
+
+    public async Task<List<GetAccountWithCurrencyModel>> GetAccountsWithCurrency()
+    {
+        await using var connection = GetConnection();
+
+        const string sql = "select a.id, a.name, a.currency_id CurrencyId, c.code Code from accounts a inner join currencies c on a.currency_id = c.id";
+        var query = await connection.QueryAsync<GetAccountWithCurrencyModel>(sql);
+
+        return query.ToList();
     }
 }

@@ -85,6 +85,26 @@ public class Tests
         Assert.That(accounts[0].CurrencyId, Is.EqualTo(currencies.First().Id));
     }
 
+    [Test]
+    public async Task CreateCurrencyAndAccountCode_ShouldCreate()
+    {
+        // arrange
+        var service = new KonyveloCrudService(ConnectionString);
+        await service.CreateCurrencyAsync(new CreateCurrencyModel("HUF"));
+        var currencies = await service.GetCurrenciesAsync();
+
+        // act
+        await service.CreateAccountAsync(new CreateAccountModel("OTP", currencies.First().Id));
+
+        // assert
+        var accounts = await service.GetAccountsWithCurrency();
+        Assert.That(accounts, Is.Not.Null);
+        Assert.That(accounts.Count, Is.EqualTo(1));
+        Assert.That(accounts[0].Name, Is.EqualTo("OTP"));
+        Assert.That(accounts[0].CurrencyId, Is.EqualTo(currencies.First().Id));
+        Assert.That(accounts[0].Code, Is.EqualTo(currencies.First().Code));
+    }
+
     protected virtual SqliteConnection GetConnection()
     {
         var connection = new SqliteConnection(ConnectionString);
