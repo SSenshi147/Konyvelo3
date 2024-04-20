@@ -14,7 +14,9 @@ public class Tests
     {
         await using var connection = GetConnection();
 
-        await connection.ExecuteAsync("DELETE FROM currencies");
+        await connection.ExecuteAsync("delete from transactions");
+        await connection.ExecuteAsync("delete from accounts");
+        await connection.ExecuteAsync("delete from currencies");
         await connection.ExecuteAsync("delete from sqlite_sequence");
     }
 
@@ -25,39 +27,62 @@ public class Tests
         {
             await using var _ = File.Create(Path);
         }
+        else
+        {
+            File.Delete(Path);
+        }
 
         await using var connection = GetConnection();
 
-        await connection.ExecuteAsync("create table if not exists 'currencies' ('Id' INTEGER NOT NULL CONSTRAINT 'PK_NewCurrencies' PRIMARY KEY AUTOINCREMENT, 'Code' TEXT NOT NULL);");
+        await connection.ExecuteAsync("create table if not exists 'currencies' ('id' INTEGER NOT NULL CONSTRAINT 'PK_currencies' PRIMARY KEY AUTOINCREMENT, 'code' TEXT NOT NULL);");
+
+        await connection.ExecuteAsync("CREATE TABLE if not exists 'accounts'" +
+                                      "('id' INTEGER NOT NULL CONSTRAINT 'PK_accounts' PRIMARY KEY AUTOINCREMENT," +
+                                      " 'name' TEXT NOT NULL, " +
+                                      " 'currency_id' INTEGER NOT NULL, CONSTRAINT 'FK_accounts_currencies_currency_id' FOREIGN KEY ('currency_id') REFERENCES 'currencies' ('id') ON DELETE CASCADE)");
+
+        await connection.ExecuteAsync("CREATE TABLE 'transactions' (" +
+            "'id' INTEGER NOT NULL CONSTRAINT 'PK_transactions' PRIMARY KEY AUTOINCREMENT," +
+            "'type' TEXT NOT NULL," +
+            "'info' TEXT NOT NULL," +
+            "'date' TEXT NOT NULL," +
+            "'account_id' INTEGER NOT NULL," +
+            "CONSTRAINT 'FK_transactions_accounts_account_id' FOREIGN KEY ('account_id') REFERENCES 'accounts' ('id') ON DELETE CASCADE)");
     }
 
     [Test]
-    public async Task Test1()
+    public async Task CreateCurrency_ShouldCreate()
     {
+        // arrange
         var service = new KonyveloCrudService(ConnectionString);
-        await service.CreateCurrencyAsync("HUF");
 
-        await using var connection = GetConnection();
+        // act
+        await service.CreateCurrencyAsync(new CreateCurrencyModel("HUF"));
 
-        var queryResult = (await connection.QueryAsync<CodeModel>("select code from currencies")).ToArray();
-        Assert.That(queryResult, Is.Not.Null);
-        Assert.That(queryResult.Length, Is.EqualTo(1));
-        Assert.That(queryResult[0].Code, Is.EqualTo("HUF"));
+        // assert
+        var currencies = await service.GetCurrenciesAsync();
+        Assert.That(currencies, Is.Not.Null);
+        Assert.That(currencies.Count, Is.EqualTo(1));
+        Assert.That(currencies[0].Code, Is.EqualTo("HUF"));
     }
 
     [Test]
-    public async Task Test2()
+    public async Task CreateCurrencyAndAccount_ShouldCreate()
     {
+        // arrange
         var service = new KonyveloCrudService(ConnectionString);
-        await service.CreateCurrencyAsync("HUF");
-        await service.CreateCurrencyAsync("USD");
-        await service.CreateCurrencyAsync("EUR");
+        await service.CreateCurrencyAsync(new CreateCurrencyModel("HUF"));
+        var currencies = await service.GetCurrenciesAsync();
 
-        await using var connection = GetConnection();
+        // act
+        await service.CreateAccountAsync(new CreateAccountModel("OTP", currencies.First().Id));
 
-        var queryResult = (await connection.QueryAsync<CodeModel>("select code from currencies")).ToArray();
-        Assert.That(queryResult, Is.Not.Null);
-        Assert.That(queryResult.Length, Is.EqualTo(3));
+        // assert
+        var accounts = await service.GetAccountsAsync();
+        Assert.That(accounts, Is.Not.Null);
+        Assert.That(accounts.Count, Is.EqualTo(1));
+        Assert.That(accounts[0].Name, Is.EqualTo("OTP"));
+        Assert.That(accounts[0].CurrencyId, Is.EqualTo(currencies.First().Id));
     }
 
     protected virtual SqliteConnection GetConnection()
