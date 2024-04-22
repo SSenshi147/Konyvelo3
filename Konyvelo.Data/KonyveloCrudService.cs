@@ -1,4 +1,5 @@
-﻿using CsharpGoodies.Common.Extensions;
+﻿using System.Net;
+using CsharpGoodies.Common.Extensions;
 using Dapper;
 using Konyvelo.Data.Dtos;
 using Konyvelo.Data.Models;
@@ -51,8 +52,8 @@ internal class KonyveloCrudService : IKonyveloCrudService
 
     public async Task<List<GetCurrencyDto>> GetAllCurrenciesAsync()
     {
-        const string sql = "select c.id, sum(t.total) Total, c.code from transactions t join accounts a on t.account_id = a.id join currencies c on a.currency_id = c.id group by c.id";
-
+        var sql = await File.ReadAllTextAsync(@"D:\repos\Konyvelo\Konyvelo.Data\Sqls\get_all_currencies.sql");
+        
         await using var conn = new SqliteConnection(connectionString);
         var query = await conn.QueryAsync<GetCurrencyDto>(sql);
 
@@ -61,7 +62,7 @@ internal class KonyveloCrudService : IKonyveloCrudService
 
     public async Task<List<GetAccountDto>> GetAllAccountsAsync()
     {
-        const string sql = "select c.id CurrencyId, sum(t.total) Total, c.code CurrencyCode, a.name Name, a.id Id from transactions t join accounts a on t.account_id = a.id join currencies c on a.currency_id = c.id group by a.id";
+        var sql = await File.ReadAllTextAsync(@"D:\repos\Konyvelo\Konyvelo.Data\Sqls\get_all_accounts.sql");
 
         await using var conn = new SqliteConnection(connectionString);
         var query = await conn.QueryAsync<GetAccountDto>(sql);
