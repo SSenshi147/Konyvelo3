@@ -1,8 +1,7 @@
 ﻿@page "/pivot"
 @using CsharpGoodies.Common.Extensions;
 @using System.Globalization;
-@using Konyvelo.Domain
-@using Konyvelo.Dtos
+@using Konyvelo.Data.Dtos
 
 <h3>Pivot</h3>
 
@@ -62,15 +61,15 @@
                                     </TableHeader>
                                 </Table>
                             </TitleTemplate>
-                            <ChildContent>
+                           @*  <ChildContent>
                                 @foreach (var transaction in pivotTransaction.Transactions)
                                 {
                                     <TableRow @onclick="@(() => this.selectedTransactions = pivotTransaction.Transactions)">
                                         <TableRowCell>@transaction.Info</TableRowCell>
-                                            <TableRowCell TextAlignment="TextAlignment.End"> @transaction.Total.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) @transaction.Account.Currency.Code</TableRowCell>
-                                        </TableRow>
+                                        <TableRowCell TextAlignment="TextAlignment.End"> @transaction.Total.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) @transaction.Account.Currency.Code</TableRowCell>
+                                    </TableRow>
                                 }
-                            </ChildContent>
+                            </ChildContent> *@
                         </TableRowGroup>
 
                     }
@@ -98,16 +97,16 @@
     </Table>
 } *@
 
-@code{
+@code {
 
-    private List<PivotTransaction> pivotTransactions = new();
+    private List<PivotTransactionDto> pivotTransactions = [];
     private DateOnly begin = new DateOnly(DateTime.Today.Year, DateTime.Today.Month, 1);
 
     private DateOnly end = new DateOnly(DateTime.Today.Year, DateTime.Today.Month,
         DateTime.DaysInMonth(DateTime.Today.Year, DateTime.Today.Month));
 
     private decimal grandTotal;
-    private List<Transaction>? selectedTransactions;
+    private List<PivotTransactionDto>? selectedTransactions;
 
     protected override async Task OnInitializedAsync()
     {
@@ -118,13 +117,16 @@
 
     private async Task UpdatePivot()
     {
-        var pivot = await _konyveloService.GetPivotTransactions(this.begin, this.end);
-        
-        this.pivotTransactions = pivot.PivotTransactions.Where(x => x.Transactions.GetTotal() != 0)
+        var pivot = await _konyveloService.GetAllPivotTransactionsAsync(this.begin, this.end);
+
+        // TODO
+        this.pivotTransactions = pivot.PivotTransactions
+            //.Where(x => x.Transactions.GetTotal() != 0)
             .OrderBy(x => x.Category).ToList();
-        
-        this.grandTotal = this.pivotTransactions.Where(x => x.Transactions.GetTotal() != 0)
-            .Sum(x => x.Transactions.GetTotal());
+
+        // this.grandTotal = this.pivotTransactions
+        //     .Where(x => x.Transactions.GetTotal() != 0)
+        //     .Sum(x => x.Transactions);
     }
 
     private async Task PreviousMonth()

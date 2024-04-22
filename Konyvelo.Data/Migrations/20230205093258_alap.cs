@@ -29,7 +29,7 @@ namespace Konyvelo.Logic.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Wallets",
+                name: "Accounts",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
@@ -75,7 +75,7 @@ namespace Konyvelo.Logic.Migrations
                     table.ForeignKey(
                         name: "FK_Transactions_Wallets_WalletId",
                         column: x => x.WalletId,
-                        principalTable: "Wallets",
+                        principalTable: "Accounts",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -87,7 +87,7 @@ namespace Konyvelo.Logic.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_Wallets_CurrencyId",
-                table: "Wallets",
+                table: "Accounts",
                 column: "CurrencyId");
         }
 
@@ -98,7 +98,7 @@ namespace Konyvelo.Logic.Migrations
                 name: "Transactions");
 
             migrationBuilder.DropTable(
-                name: "Wallets");
+                name: "Accounts");
 
             migrationBuilder.DropTable(
                 name: "Currencies");

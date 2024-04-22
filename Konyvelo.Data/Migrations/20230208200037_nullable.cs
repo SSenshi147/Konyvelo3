@@ -13,7 +13,7 @@ namespace Konyvelo.Logic.Migrations
         {
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
-                table: "Wallets",
+                table: "Accounts",
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(DateTime),
@@ -21,7 +21,7 @@ namespace Konyvelo.Logic.Migrations
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "DeletedAt",
-                table: "Wallets",
+                table: "Accounts",
                 type: "TEXT",
                 nullable: true,
                 oldClrType: typeof(DateTime),
@@ -73,7 +73,7 @@ namespace Konyvelo.Logic.Migrations
         {
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
-                table: "Wallets",
+                table: "Accounts",
                 type: "TEXT",
                 nullable: false,
                 defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -83,7 +83,7 @@ namespace Konyvelo.Logic.Migrations
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "DeletedAt",
-                table: "Wallets",
+                table: "Accounts",
                 type: "TEXT",
                 nullable: false,
                 defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),

@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Konyvelo.Data\Konyvelo.Data.csproj" />
     <ProjectReference Include="..\Konyvelo\Konyvelo.csproj" />
   </ItemGroup>
 

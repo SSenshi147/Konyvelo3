@@ -1,13 +1,10 @@
 ﻿@page "/"
-@using System.Reflection;
-@using System.Globalization;
-@using Konyvelo.Domain
+@using System.Globalization
+@using Konyvelo.Data.Dtos
 
 <h3>Currencies</h3>
 
-@* <Button @onclick=@(async() => await this.Import())>IMPORT</Button> *@
-
-<DataGrid TItem="Currency"
+<DataGrid TItem="GetCurrencyDto"
           Data="this._currencies"
           Editable
           EditMode="DataGridEditMode.Inline"
@@ -23,13 +20,13 @@
           Groupable
           ShowGrouping
           ResizeMode="TableResizeMode.Columns"
-          NewItemCreator="() => new Currency()"
+          NewItemCreator="() => new GetCurrencyDto()"
           UseInternalEditing=false
           RowInserted="this.AddCurrency"
           RowUpdated="this.UpdateCurrency"
           RowRemoved="this.DeleteCurrency">
     <DataGridColumns>
-        <DataGridColumn Field="@nameof(Currency.Code)" Caption="Code" Editable></DataGridColumn>
+        <DataGridColumn Field="@nameof(GetCurrencyDto.Code)" Caption="Code" Editable></DataGridColumn>
         <DataGridCommandColumn PreventRowClick>
             <NewCommandTemplate>
                 <Button Color="Color.Success" Clicked="@context.Clicked">@context.LocalizationString</Button>
@@ -55,8 +52,8 @@
 
 <h3>Accounts</h3>
 
-<DataGrid TItem="Account"
-          Data="this._wallets"
+<DataGrid TItem="GetAccountDto"
+          Data="this._accounts"
           Editable
           EditMode="DataGridEditMode.Inline"
           Sortable
@@ -74,15 +71,15 @@
           UseInternalEditing=false
           RowInserted="this.AddWallet"
           RowUpdated="this.UpdateWallet"
-          RowRemoved="this.DeleteWallet">
+          RowRemoved="this.DeleteAccount">
     <DataGridColumns>
-        <DataGridColumn Field="@nameof(Account.Name)" Caption="Name" Editable></DataGridColumn>
-        <DataGridColumn Field="@nameof(Account.CurrencyId)" Caption="Currency" Editable>
+        <DataGridColumn Field="@nameof(GetAccountDto.Name)" Caption="Name" Editable></DataGridColumn>
+        <DataGridColumn Field="@nameof(GetAccountDto.CurrencyId)" Caption="Currency" Editable>
             <DisplayTemplate>
-                @context.Currency.Code
+                @context.CurrencyCode
             </DisplayTemplate>
             <EditTemplate>
-                <SelectList TItem="Currency"
+                <SelectList TItem="GetCurrencyDto"
                             TValue="int"
                             Data="this._currencies"
                             TextField="@(x => x.Code)"
@@ -95,9 +92,10 @@
                 </SelectList>
             </EditTemplate>
         </DataGridColumn>
-        <DataGridColumn Field="@(nameof(Account.Total))" Caption="Total calculated" TextAlignment="TextAlignment.End">
+        @* TODO *@
+        <DataGridColumn Field="@(nameof(GetAccountDto.Total))" Caption="Total calculated" TextAlignment="TextAlignment.End">
             <DisplayTemplate>
-                @context.Total.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) @context.Currency.Code
+                @context.Total.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) @context.CurrencyCode
             </DisplayTemplate>
         </DataGridColumn>
         <DataGridCommandColumn PreventRowClick>
@@ -125,8 +123,8 @@
 
 @code
 {
-    private List<Currency> _currencies = new();
-    private List<Account> _wallets = new();
+    private List<GetCurrencyDto> _currencies = [];
+    private List<GetAccountDto> _accounts = [];
 
     protected override async Task OnInitializedAsync()
     {
@@ -138,31 +136,38 @@
 
     private async Task LoadCurrencies()
     {
-        _currencies = await _konyveloService.GetAllCurrencies();
+        _currencies = await _konyveloService.GetAllCurrenciesAsync();
     }
 
     private async Task LoadWallets()
     {
-        _wallets = await _konyveloService.GetAllWallets();
+        _accounts = await _konyveloService.GetAllAccountsAsync();
     }
 
-    private async Task AddCurrency(SavedRowItem<Currency, Dictionary<string, object>> savedRowItem)
+    private async Task AddCurrency(SavedRowItem<GetCurrencyDto, Dictionary<string, object>> savedRowItem)
     {
         var currency = savedRowItem.Item;
-        await _konyveloService.CreateCurrency(currency);
+        await _konyveloService.CreateCurrencyAsync(new CreateCurrencyDto()
+        {
+            Code = currency.Code
+        });
 
         await LoadCurrencies();
     }
 
-    private async Task AddWallet(SavedRowItem<Account, Dictionary<string, object>> savedRowItem)
+    private async Task AddWallet(SavedRowItem<GetAccountDto, Dictionary<string, object>> savedRowItem)
     {
-        var wallet = savedRowItem.Item;
-        await _konyveloService.CreateWallet(wallet);
+        var account = savedRowItem.Item;
+        await _konyveloService.CreateAccountAsync(new CreateAccountDto()
+        {
+            CurrencyId = account.CurrencyId,
+            Name = account.Name
+        });
 
         await LoadWallets();
     }
 
-    private async Task UpdateCurrency(SavedRowItem<Currency, Dictionary<string, object>> savedRowItem)
+    private async Task UpdateCurrency(SavedRowItem<GetCurrencyDto, Dictionary<string, object>> savedRowItem)
     {
         var currency = savedRowItem.Item;
         var changes = savedRowItem.Values;
@@ -172,37 +177,42 @@
             property?.SetValue(currency, change.Value);
         }
 
-        await _konyveloService.UpdateCurrency(currency);
+        await _konyveloService.UpdateCurrencyAsync(new UpdateCurrencyDto()
+        {
+            Code = currency.Code,
+            Id = currency.Id
+        });
         await LoadCurrencies();
     }
 
-    private async Task UpdateWallet(SavedRowItem<Account, Dictionary<string, object>> savedRowItem)
+    private async Task UpdateWallet(SavedRowItem<GetAccountDto, Dictionary<string, object>> savedRowItem)
     {
-        var wallet = savedRowItem.Item;
+        var account = savedRowItem.Item;
         var changes = savedRowItem.Values;
         foreach (var change in changes)
         {
-            var property = wallet.GetType().GetProperty(change.Key);
-            property?.SetValue(wallet, change.Value);
+            var property = account.GetType().GetProperty(change.Key);
+            property?.SetValue(account, change.Value);
         }
 
-        await _konyveloService.UpdateWallet(wallet);
+        await _konyveloService.UpdateAccountAsync(new UpdateAccountDto()
+        {
+            CurrencyId = account.CurrencyId,
+            Id = account.Id,
+            Name = account.Name
+        });
         await LoadWallets();
     }
 
-    private async Task DeleteCurrency(Currency currency)
+    private async Task DeleteCurrency(GetCurrencyDto currency)
     {
-        await _konyveloService.DeleteCurrency(currency);
+        await _konyveloService.DeleteCurrencyAsync(currency.Id);
         await LoadCurrencies();
     }
 
-    private async Task DeleteWallet(Account account)
+    private async Task DeleteAccount(GetAccountDto account)
     {
-        await _konyveloService.DeleteWallet(account);
+        await _konyveloService.DeleteAccountAsync(account.Id);
         await LoadWallets();
-    }
-
-    private async Task Import()
-    {
     }
 }

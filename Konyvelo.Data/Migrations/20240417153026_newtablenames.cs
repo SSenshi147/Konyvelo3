@@ -16,11 +16,11 @@ namespace Konyvelo.Logic.Migrations
 
             migrationBuilder.DropForeignKey(
                 name: "FK_Wallets_Currencies_CurrencyId",
-                table: "Wallets");
+                table: "Accounts");
 
             migrationBuilder.DropPrimaryKey(
                 name: "PK_Wallets",
-                table: "Wallets");
+                table: "Accounts");
 
             migrationBuilder.DropPrimaryKey(
                 name: "PK_Transactions",
@@ -31,7 +31,7 @@ namespace Konyvelo.Logic.Migrations
                 table: "Currencies");
 
             migrationBuilder.RenameTable(
-                name: "Wallets",
+                name: "Accounts",
                 newName: "wallets_old");
 
             migrationBuilder.RenameTable(
@@ -109,7 +109,7 @@ namespace Konyvelo.Logic.Migrations
 
             migrationBuilder.RenameTable(
                 name: "wallets_old",
-                newName: "Wallets");
+                newName: "Accounts");
 
             migrationBuilder.RenameTable(
                 name: "transactions_old",
@@ -121,7 +121,7 @@ namespace Konyvelo.Logic.Migrations
 
             migrationBuilder.RenameIndex(
                 name: "IX_wallets_old_CurrencyId",
-                table: "Wallets",
+                table: "Accounts",
                 newName: "IX_Wallets_CurrencyId");
 
             migrationBuilder.RenameIndex(
@@ -131,7 +131,7 @@ namespace Konyvelo.Logic.Migrations
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_Wallets",
-                table: "Wallets",
+                table: "Accounts",
                 column: "Id");
 
             migrationBuilder.AddPrimaryKey(
@@ -148,13 +148,13 @@ namespace Konyvelo.Logic.Migrations
                 name: "FK_Transactions_Wallets_WalletId",
                 table: "Transactions",
                 column: "WalletId",
-                principalTable: "Wallets",
+                principalTable: "Accounts",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Wallets_Currencies_CurrencyId",
-                table: "Wallets",
+                table: "Accounts",
                 column: "CurrencyId",
                 principalTable: "Currencies",
                 principalColumn: "Id",

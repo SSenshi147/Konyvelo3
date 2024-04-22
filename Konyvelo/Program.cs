@@ -1,4 +1,6 @@
-using Konyvelo;
+using Blazorise.Bootstrap;
+using Blazorise.Icons.FontAwesome;
+using Konyvelo.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,9 +8,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
-builder.ConfigureDbContext();
-builder.ConfigureServices();
-builder.ConfigureBlazorise();
+builder.Services.AddBlazorise();
+builder.Services.AddBootstrapProviders().AddFontAwesomeIcons();
+
+builder.Services.ConfigureDbContext(builder.Configuration);
+builder.Services.ConfigureServices();
 
 var app = builder.Build();
 

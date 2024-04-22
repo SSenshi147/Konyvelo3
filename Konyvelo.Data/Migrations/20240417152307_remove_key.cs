@@ -5,14 +5,30 @@
 namespace Konyvelo.Logic.Migrations
 {
     /// <inheritdoc />
-    public partial class key : Migration
+    public partial class remove_key : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropColumn(
+                name: "Key",
+                table: "Accounts");
+
+            migrationBuilder.DropColumn(
+                name: "Key",
+                table: "Transactions");
+
+            migrationBuilder.DropColumn(
+                name: "Key",
+                table: "Currencies");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
             migrationBuilder.AddColumn<int>(
                 name: "Key",
-                table: "Wallets",
+                table: "Accounts",
                 type: "INTEGER",
                 nullable: false,
                 defaultValue: 0);
@@ -30,22 +46,6 @@ namespace Konyvelo.Logic.Migrations
                 type: "INTEGER",
                 nullable: false,
                 defaultValue: 0);
-        }
-
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropColumn(
-                name: "Key",
-                table: "Wallets");
-
-            migrationBuilder.DropColumn(
-                name: "Key",
-                table: "Transactions");
-
-            migrationBuilder.DropColumn(
-                name: "Key",
-                table: "Currencies");
         }
     }
 }

@@ -12,7 +12,7 @@ namespace Konyvelo.Logic.Migrations
         {
             migrationBuilder.AlterColumn<decimal>(
                 name: "Total",
-                table: "Wallets",
+                table: "Accounts",
                 type: "TEXT",
                 nullable: false,
                 oldClrType: typeof(double),
@@ -32,7 +32,7 @@ namespace Konyvelo.Logic.Migrations
         {
             migrationBuilder.AlterColumn<double>(
                 name: "Total",
-                table: "Wallets",
+                table: "Accounts",
                 type: "REAL",
                 nullable: false,
                 oldClrType: typeof(decimal),

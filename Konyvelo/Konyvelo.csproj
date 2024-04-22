@@ -28,6 +28,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\CsharpGoodies\CsharpGoodies.Common\CsharpGoodies.Common.csproj" />
+	  <ProjectReference Include="..\Konyvelo.Data\Konyvelo.Data.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
