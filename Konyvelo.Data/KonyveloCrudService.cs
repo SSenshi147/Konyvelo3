@@ -30,27 +30,84 @@ public interface IKonyveloCrudService
     Task<DateOnly> GetFirstTransactionDate();
 }
 
-internal class KonyveloCrudService(KonyveloDbContext context, IConfiguration config) : IKonyveloCrudService
+internal class KonyveloCrudService : IKonyveloCrudService
 {
     private const string CONNECTION_STRING_KEY = "SqliteConnectionString";
 
+    private readonly KonyveloDbContext context;
+    private readonly string connectionString;
+
+    public KonyveloCrudService(KonyveloDbContext context, IConfiguration config)
+    {
+        this.context = context;
+        connectionString = config[CONNECTION_STRING_KEY] ?? throw new Exception();
+    }
+
+    internal KonyveloCrudService(KonyveloDbContext context, string connectionString)
+    {
+        this.context = context;
+        this.connectionString = connectionString;
+    }
+
     public async Task<List<GetCurrencyDto>> GetAllCurrenciesAsync()
     {
-        return await context.Currencies.Select(x => new GetCurrencyDto()
-        {
-            Code = x.Code,
-            Id = x.Id
-        }).ToListAsync();
+        const string sql = "select c.id, sum(t.total) Total, c.code from transactions t join accounts a on t.account_id = a.id join currencies c on a.currency_id = c.id group by c.id";
+
+        await using var conn = new SqliteConnection(connectionString);
+        var query = await conn.QueryAsync<GetCurrencyDto>(sql);
+
+        return query.ToList();
     }
 
     public async Task<List<GetAccountDto>> GetAllAccountsAsync()
     {
-        const string sql = "select c.code CurrencyCode, AccountName Name, CurrencyId, AccountId Id, AccountTotal Total from currencies c join (select a.name AccountName, a.currency_id CurrencyId, AccountId, AccountTotal from accounts a join (select t.account_id AccountId, sum(t.total) AccountTotal FROM transactions t group by AccountId) on a.id = AccountId) on c.id = CurrencyId";
+        const string sql = "select c.id CurrencyId, sum(t.total) Total, c.code CurrencyCode, a.name Name, a.id Id from transactions t join accounts a on t.account_id = a.id join currencies c on a.currency_id = c.id group by a.id";
 
-        await using var conn = new SqliteConnection(config[CONNECTION_STRING_KEY]);
+        await using var conn = new SqliteConnection(connectionString);
         var query = await conn.QueryAsync<GetAccountDto>(sql);
 
         return query.ToList();
+    }
+
+    internal async Task<List<GetAccountDto>> GetAllAccountsAsync2()
+    {
+        const string sql = "select c.code CurrencyCode, AccountName Name, CurrencyId, AccountId Id, AccountTotal Total from currencies c join (select a.name AccountName, a.currency_id CurrencyId, AccountId, AccountTotal from accounts a join (select t.account_id AccountId, sum(t.total) AccountTotal FROM transactions t group by AccountId) on a.id = AccountId) on c.id = CurrencyId";
+
+        await using var conn = new SqliteConnection(connectionString);
+        var query = await conn.QueryAsync<GetAccountDto>(sql);
+
+        return query.ToList();
+    }
+
+    internal async Task<List<GetAccountDto>> GetAllAccountsAsync3()
+    {
+        var all = await GetAllAsync();
+        return all
+            .GroupBy(x => new { x.AccountId, x.AccountName, x.CurrencyId, x.CurrencyCode })
+            .Select(x => new GetAccountDto()
+            {
+                CurrencyCode = x.Key.CurrencyCode,
+                CurrencyId = x.Key.CurrencyId,
+                Id = x.Key.AccountId,
+                Name = x.Key.AccountName,
+                Total = x.Sum(y => y.Total)
+            })
+            .ToList();
+    }
+
+    internal async Task<List<GetAccountDto>> Get4()
+    {
+        var query = from transaction in context.Transactions
+                    join account in context.Accounts on transaction.AccountId equals account.Id
+                    join currency in context.Currencies on account.CurrencyId equals currency.Id
+                    group transaction by account.Id into g
+                    select new GetAccountDto()
+                    {
+                        Id = g.Key,
+                        Total2 = g.Sum(x => (double)x.Total)
+                    };
+
+        return await query.ToListAsync();
     }
 
     public async Task<List<GetTransactionDto>> GetAllTransactionsAsync()

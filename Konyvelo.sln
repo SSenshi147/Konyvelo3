@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CsharpGoodies.Common", "..\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Konyvelo.Tests", "Konyvelo.Tests\Konyvelo.Tests.csproj", "{F3BA8C8D-46A2-4300-B314-56AC88D45DD1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Konyvelo.Data", "Konyvelo.Data\Konyvelo.Data.csproj", "{7B80116A-7A0B-4CFF-93E4-CCAE92F56D3D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Konyvelo.Data", "Konyvelo.Data\Konyvelo.Data.csproj", "{7B80116A-7A0B-4CFF-93E4-CCAE92F56D3D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Konyvelo.Benchmark", "Konyvelo.Benchmark\Konyvelo.Benchmark.csproj", "{A22A6A17-5FF0-44EA-8237-4EBCE4530455}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{7B80116A-7A0B-4CFF-93E4-CCAE92F56D3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7B80116A-7A0B-4CFF-93E4-CCAE92F56D3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7B80116A-7A0B-4CFF-93E4-CCAE92F56D3D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A22A6A17-5FF0-44EA-8237-4EBCE4530455}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A22A6A17-5FF0-44EA-8237-4EBCE4530455}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A22A6A17-5FF0-44EA-8237-4EBCE4530455}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A22A6A17-5FF0-44EA-8237-4EBCE4530455}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

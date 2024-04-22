@@ -119,7 +119,7 @@
     {
         await base.OnInitializedAsync();
 
-        await LoadWallets();
+        await LoadAccounts();
         await LoadTransactions();
     }
 
@@ -129,7 +129,7 @@
         _transactions = _transactions.OrderByDescending(x => x.Date).ToList();
     }
 
-    private async Task LoadWallets()
+    private async Task LoadAccounts()
     {
         _accounts = await _konyveloService.GetAllAccountsAsync();
     }

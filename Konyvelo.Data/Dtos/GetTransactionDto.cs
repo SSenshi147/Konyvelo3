@@ -4,6 +4,7 @@ public class GetCurrencyDto
 {
     public int Id { get; init; }
     public string Code { get; init; } = string.Empty;
+    public decimal Total { get; init; }
 }
 
 public class CreateCurrencyDto
@@ -24,6 +25,7 @@ public class GetAccountDto
     public int CurrencyId { get; init; }
     public string CurrencyCode { get; init; } = string.Empty;
     public decimal Total { get; init; }
+    public double Total2 { get; init; }
 }
 
 public class CreateAccountDto
