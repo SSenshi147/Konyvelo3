@@ -26,7 +26,7 @@ public interface IKonyveloCrudService
     Task DeleteAccountAsync(int accountId);
     Task DeleteTransactionAsync(int transactionId);
 
-    Task<GetPivotTransactionsDto> GetAllPivotTransactionsAsync(DateOnly begindate, DateOnly endDate);
+    Task<GetPivotTransactionsDto> GetAllPivotTransactionsAsync(DateOnly beginDate, DateOnly endDate);
     Task<DateOnly> GetFirstTransactionDate();
 }
 
@@ -49,7 +49,7 @@ internal class KonyveloCrudService(KonyveloDbContext context, IConfiguration con
 
         await using var conn = new SqliteConnection(config[CONNECTION_STRING_KEY]);
         var query = await conn.QueryAsync<GetAccountDto>(sql);
-        
+
         return query.ToList();
     }
 
@@ -231,23 +231,23 @@ internal class KonyveloCrudService(KonyveloDbContext context, IConfiguration con
         return query.Date;
     }
 
-    public async Task<GetPivotTransactionsDto> GetAllPivotTransactionsAsync(DateOnly begindate, DateOnly endDate)
+    public async Task<GetPivotTransactionsDto> GetAllPivotTransactionsAsync(DateOnly beginDate, DateOnly endDate)
     {
-        var transactions = await context.Transactions.ToListAsync();
+        var transactions = await GetAllAsync();
 
         var categories = transactions
             .GroupBy(x => x.Category)
             .Select(x => new PivotTransactionDto()
             {
                 Category = x.Key,
-                Transactions = transactions.Where(y => y.Category == x.Key && y.Date.IsBetween(begindate, endDate))
+                Transactions = transactions.Where(y => y.Category == x.Key && y.Date.IsBetween(beginDate, endDate))
                     .Select(x => new GetTransactionDto()
                     {
                         AccountId = x.AccountId,
-                        AccountName = "", // TODO
+                        AccountName = x.AccountName,
                         Category = x.Category,
-                        CurrencyCode = "",
-                        CurrencyId = 0,
+                        CurrencyCode = x.CurrencyCode,
+                        CurrencyId = x.CurrencyId,
                         Date = x.Date,
                         Id = x.Id,
                         Info = x.Info,
@@ -263,5 +263,47 @@ internal class KonyveloCrudService(KonyveloDbContext context, IConfiguration con
         };
 
         return response;
+    }
+
+    private async Task<List<GetTransactionFullDto>> GetAllAsync()
+    {
+        return await context.Transactions
+            .Join(context.Accounts, transaction => transaction.AccountId, account => account.Id, (transaction, account) => new
+            {
+                transaction.Total,
+                transaction.AccountId,
+                transaction.Date,
+                transaction.Id,
+                transaction.Info,
+                transaction.Category,
+                account.Name,
+                account.CurrencyId
+            })
+            .Join(context.Currencies, arg => arg.CurrencyId, currency => currency.Id, (arg1, currency) => new GetTransactionFullDto()
+            {
+                AccountId = arg1.AccountId,
+                AccountName = arg1.Name,
+                Category = arg1.Category,
+                CurrencyCode = currency.Code,
+                CurrencyId = currency.Id,
+                Date = arg1.Date,
+                Id = arg1.Id,
+                Info = arg1.Info,
+                Total = arg1.Total
+            })
+            .ToListAsync();
+    }
+
+    private class GetTransactionFullDto
+    {
+        public string Category { get; set; }
+        public string? Info { get; set; }
+        public string CurrencyCode { get; set; }
+        public int CurrencyId { get; set; }
+        public DateOnly Date { get; set; }
+        public int Id { get; set; }
+        public string AccountName { get; set; }
+        public int AccountId { get; set; }
+        public decimal Total { get; set; }
     }
 }
