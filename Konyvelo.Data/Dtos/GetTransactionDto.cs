@@ -14,8 +14,8 @@ public class CreateCurrencyDto
 
 public class UpdateCurrencyDto
 {
-    public int Id { get; init; }
-    public string Code { get; init; } = string.Empty;
+    public required int Id { get; init; }
+    public string? Code { get; init; }
 }
 
 public class GetAccountDto
@@ -36,9 +36,9 @@ public class CreateAccountDto
 
 public class UpdateAccountDto
 {
-    public int Id { get; init; }
-    public string Name { get; init; } = string.Empty;
-    public int CurrencyId { get; init; }
+    public required int Id { get; init; }
+    public string? Name { get; init; }
+    public int? CurrencyId { get; init; }
 }
 
 public class GetTransactionDto
@@ -66,10 +66,10 @@ public class CreateTransactionDto
 
 public class UpdateTransactionDto
 {
-    public int Id { get; init; }
-    public string Category { get; init; } = string.Empty;
+    public required int Id { get; init; }
+    public string? Category { get; init; }
     public string? Info { get; init; }
-    public DateOnly Date { get; init; }
-    public decimal Total { get; init; }
-    public int AccountId { get; init; }
+    public DateOnly? Date { get; init; }
+    public decimal? Total { get; init; }
+    public int? AccountId { get; init; }
 }

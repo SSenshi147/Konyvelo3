@@ -1,5 +1,4 @@
-﻿using System.Net;
-using CsharpGoodies.Common.Extensions;
+﻿using CsharpGoodies.Common.Extensions;
 using Dapper;
 using Konyvelo.Data.Dtos;
 using Konyvelo.Data.Models;
@@ -53,7 +52,7 @@ internal class KonyveloCrudService : IKonyveloCrudService
     public async Task<List<GetCurrencyDto>> GetAllCurrenciesAsync()
     {
         var sql = await File.ReadAllTextAsync(@"D:\repos\Konyvelo\Konyvelo.Data\Sqls\get_all_currencies.sql");
-        
+
         await using var conn = new SqliteConnection(connectionString);
         var query = await conn.QueryAsync<GetCurrencyDto>(sql);
 
@@ -192,14 +191,14 @@ internal class KonyveloCrudService : IKonyveloCrudService
             return;
         }
 
-        if (account.Name != dto.Name)
+        if (!string.IsNullOrEmpty(dto.Name) && account.Name != dto.Name)
         {
             account.Name = dto.Name;
         }
 
-        if (account.CurrencyId != dto.CurrencyId)
+        if (dto.CurrencyId is not null && account.CurrencyId != dto.CurrencyId)
         {
-            account.CurrencyId = dto.CurrencyId;
+            account.CurrencyId = dto.CurrencyId.Value;
         }
 
         context.Accounts.Update(account);
@@ -214,7 +213,7 @@ internal class KonyveloCrudService : IKonyveloCrudService
             return;
         }
 
-        if (transaction.Category != dto.Category)
+        if (!string.IsNullOrEmpty(dto.Category) && transaction.Category != dto.Category)
         {
             transaction.Category = dto.Category;
         }
@@ -224,19 +223,19 @@ internal class KonyveloCrudService : IKonyveloCrudService
             transaction.Info = dto.Info;
         }
 
-        if (transaction.Date != dto.Date)
+        if (dto.Date is not null && transaction.Date != dto.Date)
         {
-            transaction.Date = dto.Date;
+            transaction.Date = dto.Date.Value;
         }
 
-        if (transaction.Total != dto.Total)
+        if (dto.Total is not null && transaction.Total != dto.Total)
         {
-            transaction.Total = dto.Total;
+            transaction.Total = dto.Total.Value;
         }
 
-        if (transaction.AccountId != dto.AccountId)
+        if (dto.AccountId is not null && transaction.AccountId != dto.AccountId)
         {
-            transaction.AccountId = dto.AccountId;
+            transaction.AccountId = dto.AccountId.Value;
         }
 
         context.Transactions.Update(transaction);
