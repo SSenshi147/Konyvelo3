@@ -90,8 +90,18 @@ internal class KonyveloCrudService : IKonyveloCrudService
                         Info = transaction.Info,
                         Total = transaction.Total
                     };
-
+        
         return await query.ToListAsync();
+    }
+
+    public async Task<List<GetTransactionDto>> GetAllTransactionsAsync2()
+    {
+        var sql = await GetQueryString("get_all_transactions");
+
+        await using var conn = new SqliteConnection(connectionString);
+        var query = await conn.QueryAsync<GetTransactionDto>(sql);
+
+        return query.ToList();
     }
 
     public async Task CreateCurrencyAsync(CreateCurrencyDto dto)

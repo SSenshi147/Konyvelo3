@@ -19,6 +19,8 @@ public class ServiceTests
             await using var _ = File.Create(Path);
         }
 
+        SqlMapper.AddTypeHandler(new DapperSqliteDateOnlyTypeHandler());
+
         var builder = new DbContextOptionsBuilder<KonyveloDbContext>();
         builder.UseSqlite(ConnectionString);
         _options = builder.Options;
@@ -114,7 +116,7 @@ public class ServiceTests
             Category = "kaja",
             Date = DateOnly.FromDateTime(DateTime.Today),
             Info = "pizza",
-            Total = -3000
+            Total = -3000.56
         });
 
         var transactions = await service.GetAllTransactionsAsync();
@@ -122,7 +124,7 @@ public class ServiceTests
         Assert.That(transactions, Is.Not.Empty);
         Assert.That(transactions[0].AccountName, Is.EqualTo("OTP"));
         Assert.That(transactions[0].CurrencyCode, Is.EqualTo("HUF"));
-        Assert.That(transactions[0].Total, Is.EqualTo(-3000));
+        Assert.That(transactions[0].Total, Is.EqualTo(-3000.56));
         Assert.That(transactions[0].Category, Is.EqualTo("kaja"));
         Assert.That(transactions[0].Info, Is.EqualTo("pizza"));
         Assert.That(transactions[0].Date, Is.EqualTo(DateOnly.FromDateTime(DateTime.Today)));

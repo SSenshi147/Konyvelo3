@@ -1,5 +1,6 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
+using Dapper;
 using Konyvelo.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,6 +10,9 @@ internal class Program
 {
     static async Task Main()
     {
+        //var asd = new SqlTestClass();
+        //await asd.TestEf();
+
         BenchmarkRunner.Run<SqlTestClass>();
     }
 }
@@ -23,6 +27,7 @@ public class SqlTestClass
 
     public SqlTestClass()
     {
+        SqlMapper.AddTypeHandler(new DapperSqliteDateOnlyTypeHandler());
         var builder = new DbContextOptionsBuilder<KonyveloDbContext>();
         builder.UseSqlite(ConnectionString);
         var options = builder.Options;
@@ -31,23 +36,14 @@ public class SqlTestClass
     }
 
     [Benchmark]
-    public async Task TestSubquery()
+    public async Task TestEf()
     {
-        await this.service.GetAllAccountsAsync();
+        await this.service.GetAllTransactionsAsync();
     }
 
     [Benchmark]
-    public async Task TestJoin()
+    public async Task TestSql()
     {
-    }
-
-    [Benchmark]
-    public async Task TestInMemory()
-    {
-    }
-
-    [Benchmark]
-    public async Task TestLinq()
-    {
+        await this.service.GetAllTransactionsAsync2();
     }
 }
