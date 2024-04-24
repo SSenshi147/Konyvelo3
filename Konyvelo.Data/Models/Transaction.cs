@@ -15,7 +15,7 @@ internal class Transaction : Entity
     public DateOnly Date { get; set; }
 
     [Column("total")]
-    public decimal Total { get; set; }
+    public double Total { get; set; }
 
     [Column("account_id")]
     public int AccountId { get; set; }

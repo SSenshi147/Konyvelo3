@@ -73,47 +73,6 @@ internal class KonyveloCrudService : IKonyveloCrudService
         return query.ToList();
     }
 
-    internal async Task<List<GetAccountDto>> GetAllAccountsAsync2()
-    {
-        const string sql = "select c.code CurrencyCode, AccountName Name, CurrencyId, AccountId Id, AccountTotal Total from currencies c join (select a.name AccountName, a.currency_id CurrencyId, AccountId, AccountTotal from accounts a join (select t.account_id AccountId, sum(t.total) AccountTotal FROM transactions t group by AccountId) on a.id = AccountId) on c.id = CurrencyId";
-
-        await using var conn = new SqliteConnection(connectionString);
-        var query = await conn.QueryAsync<GetAccountDto>(sql);
-
-        return query.ToList();
-    }
-
-    internal async Task<List<GetAccountDto>> GetAllAccountsAsync3()
-    {
-        var all = await GetAllAsync();
-        return all
-            .GroupBy(x => new { x.AccountId, x.AccountName, x.CurrencyId, x.CurrencyCode })
-            .Select(x => new GetAccountDto()
-            {
-                CurrencyCode = x.Key.CurrencyCode,
-                CurrencyId = x.Key.CurrencyId,
-                Id = x.Key.AccountId,
-                Name = x.Key.AccountName,
-                Total = x.Sum(y => y.Total)
-            })
-            .ToList();
-    }
-
-    internal async Task<List<GetAccountDto>> Get4()
-    {
-        var query = from transaction in context.Transactions
-                    join account in context.Accounts on transaction.AccountId equals account.Id
-                    join currency in context.Currencies on account.CurrencyId equals currency.Id
-                    group transaction by account.Id into g
-                    select new GetAccountDto()
-                    {
-                        Id = g.Key,
-                        Total2 = g.Sum(x => (double)x.Total)
-                    };
-
-        return await query.ToListAsync();
-    }
-
     public async Task<List<GetTransactionDto>> GetAllTransactionsAsync()
     {
         var query = from transaction in context.Transactions
@@ -294,7 +253,7 @@ internal class KonyveloCrudService : IKonyveloCrudService
 
     public async Task<GetPivotTransactionsDto> GetAllPivotTransactionsAsync(DateOnly beginDate, DateOnly endDate)
     {
-        var transactions = await GetAllAsync();
+        var transactions = await GetAllTransactionsAsync();
 
         var categories = transactions
             .GroupBy(x => x.Category)
@@ -326,50 +285,8 @@ internal class KonyveloCrudService : IKonyveloCrudService
         return response;
     }
 
-    private async Task<List<GetTransactionFullDto>> GetAllAsync()
-    {
-        return await context.Transactions
-            .Join(context.Accounts, transaction => transaction.AccountId, account => account.Id, (transaction, account) => new
-            {
-                transaction.Total,
-                transaction.AccountId,
-                transaction.Date,
-                transaction.Id,
-                transaction.Info,
-                transaction.Category,
-                account.Name,
-                account.CurrencyId
-            })
-            .Join(context.Currencies, arg => arg.CurrencyId, currency => currency.Id, (arg1, currency) => new GetTransactionFullDto()
-            {
-                AccountId = arg1.AccountId,
-                AccountName = arg1.Name,
-                Category = arg1.Category,
-                CurrencyCode = currency.Code,
-                CurrencyId = currency.Id,
-                Date = arg1.Date,
-                Id = arg1.Id,
-                Info = arg1.Info,
-                Total = arg1.Total
-            })
-            .ToListAsync();
-    }
-
     private async Task<string> GetQueryString(string key)
     {
         return _queries.GetOrAdd(key, await File.ReadAllTextAsync($"{SqlFolderPath}{key}.sql"));
-    }
-
-    private class GetTransactionFullDto
-    {
-        public string Category { get; set; }
-        public string? Info { get; set; }
-        public string CurrencyCode { get; set; }
-        public int CurrencyId { get; set; }
-        public DateOnly Date { get; set; }
-        public int Id { get; set; }
-        public string AccountName { get; set; }
-        public int AccountId { get; set; }
-        public decimal Total { get; set; }
     }
 }

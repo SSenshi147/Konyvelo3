@@ -39,18 +39,15 @@ public class SqlTestClass
     [Benchmark]
     public async Task TestJoin()
     {
-        await this.service.GetAllAccountsAsync2();
     }
 
     [Benchmark]
     public async Task TestInMemory()
     {
-        await this.service.GetAllAccountsAsync3();
     }
 
     [Benchmark]
     public async Task TestLinq()
     {
-        await this.service.Get4();
     }
 }
