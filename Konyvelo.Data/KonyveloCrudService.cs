@@ -5,6 +5,7 @@ using Konyvelo.Data.Models;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using System.Collections.Concurrent;
 
 namespace Konyvelo.Data;
 
@@ -33,9 +34,12 @@ public interface IKonyveloCrudService
 internal class KonyveloCrudService : IKonyveloCrudService
 {
     private const string CONNECTION_STRING_KEY = "SqliteConnectionString";
+    private const string SqlFolderPath = @"D:\repos\Konyvelo\Konyvelo.Data\Sqls\";
+    // TODO: ez itt nagyon nem jó
 
     private readonly KonyveloDbContext context;
     private readonly string connectionString;
+    private readonly ConcurrentDictionary<string, string> _queries = [];
 
     public KonyveloCrudService(KonyveloDbContext context, IConfiguration config)
     {
@@ -51,7 +55,7 @@ internal class KonyveloCrudService : IKonyveloCrudService
 
     public async Task<List<GetCurrencyDto>> GetAllCurrenciesAsync()
     {
-        var sql = await File.ReadAllTextAsync(@"D:\repos\Konyvelo\Konyvelo.Data\Sqls\get_all_currencies.sql");
+        var sql = await GetQueryString("get_all_currencies");
 
         await using var conn = new SqliteConnection(connectionString);
         var query = await conn.QueryAsync<GetCurrencyDto>(sql);
@@ -61,7 +65,7 @@ internal class KonyveloCrudService : IKonyveloCrudService
 
     public async Task<List<GetAccountDto>> GetAllAccountsAsync()
     {
-        var sql = await File.ReadAllTextAsync(@"D:\repos\Konyvelo\Konyvelo.Data\Sqls\get_all_accounts.sql");
+        var sql = await GetQueryString("get_all_accounts");
 
         await using var conn = new SqliteConnection(connectionString);
         var query = await conn.QueryAsync<GetAccountDto>(sql);
@@ -349,6 +353,11 @@ internal class KonyveloCrudService : IKonyveloCrudService
                 Total = arg1.Total
             })
             .ToListAsync();
+    }
+
+    private async Task<string> GetQueryString(string key)
+    {
+        return _queries.GetOrAdd(key, await File.ReadAllTextAsync($"{SqlFolderPath}{key}.sql"));
     }
 
     private class GetTransactionFullDto

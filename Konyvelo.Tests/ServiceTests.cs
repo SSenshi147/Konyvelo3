@@ -15,13 +15,8 @@ public class ServiceTests
     [OneTimeSetUp]
     public async Task OneTimeSetup()
     {
-        if (!File.Exists(Path))
         {
             await using var _ = File.Create(Path);
-        }
-        else
-        {
-            File.Delete(Path);
         }
 
         var builder = new DbContextOptionsBuilder<KonyveloDbContext>();
@@ -29,7 +24,7 @@ public class ServiceTests
         _options = builder.Options;
 
         await using var connection = GetConnection();
-        var sql = await File.ReadAllTextAsync(@"D:\repos\Konyvelo\Konyvelo\db.sql");
+        var sql = await File.ReadAllTextAsync(@"D:\repos\Konyvelo\Konyvelo.Data\Sqls\db.sql");
         await connection.ExecuteAsync(sql);
     }
 
@@ -177,7 +172,7 @@ public class ServiceTests
             Id = accounts[0].Id,
             Name = "Revolut"
         });
-        
+
         accounts = await service.GetAllAccountsAsync();
         Assert.That(accounts, Is.Not.Null);
         Assert.That(accounts, Is.Not.Empty);
