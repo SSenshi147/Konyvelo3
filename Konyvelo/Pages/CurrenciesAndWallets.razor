@@ -157,7 +157,7 @@
     private async Task AddWallet(SavedRowItem<Account, Dictionary<string, object>> savedRowItem)
     {
         var wallet = savedRowItem.Item;
-        await _konyveloService.CreateWallet(wallet);
+        await _konyveloService.CreateWallet(new CreateAccountModel(wallet.CurrencyId, wallet.Name));
 
         await LoadWallets();
     }
