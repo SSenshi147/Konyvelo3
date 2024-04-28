@@ -29,6 +29,7 @@ public interface IKonyveloCrudService
 
     Task<GetPivotTransactionsDto> GetAllPivotTransactionsAsync(DateOnly beginDate, DateOnly endDate);
     Task<DateOnly> GetFirstTransactionDate();
+    Task<List<PivotBaseDto>> GetPivotBaseAsync(DateOnly beginDate, DateOnly endDate);
 }
 
 internal class KonyveloCrudService : IKonyveloCrudService
@@ -75,23 +76,12 @@ internal class KonyveloCrudService : IKonyveloCrudService
 
     public async Task<List<GetTransactionDto>> GetAllTransactionsAsync()
     {
-        var query = from transaction in context.Transactions
-                    join account in context.Accounts on transaction.AccountId equals account.Id
-                    join currency in context.Currencies on account.CurrencyId equals currency.Id
-                    select new GetTransactionDto()
-                    {
-                        AccountId = account.Id,
-                        CurrencyId = currency.Id,
-                        AccountName = account.Name,
-                        Category = transaction.Category,
-                        CurrencyCode = currency.Code,
-                        Date = transaction.Date,
-                        Id = transaction.Id,
-                        Info = transaction.Info,
-                        Total = transaction.Total
-                    };
-        
-        return await query.ToListAsync();
+        var sql = await GetQueryString("get_all_transactions");
+
+        await using var conn = new SqliteConnection(connectionString);
+        var query = await conn.QueryAsync<GetTransactionDto>(sql);
+
+        return query.ToList();
     }
 
     public async Task<List<GetTransactionDto>> GetAllTransactionsAsync2()
@@ -112,6 +102,13 @@ internal class KonyveloCrudService : IKonyveloCrudService
         };
         await context.Currencies.AddAsync(model);
         await context.SaveChangesAsync();
+    }
+
+    public async Task CreateCurrencyAsync2(CreateCurrencyDto dto)
+    {
+        var sql = await GetQueryString("insert_currency");
+        await using var conn = new SqliteConnection(connectionString);
+        await conn.ExecuteAsync(sql, new { Code = dto.Code });
     }
 
     public async Task CreateAccountAsync(CreateAccountDto dto)
@@ -259,6 +256,16 @@ internal class KonyveloCrudService : IKonyveloCrudService
             .FirstOrDefaultAsync();
 
         return query.Date;
+    }
+
+    public async Task<List<PivotBaseDto>> GetPivotBaseAsync(DateOnly beginDate, DateOnly endDate)
+    {
+        var sql = await GetQueryString("get_pivot_base");
+
+        await using var connection = new SqliteConnection(connectionString);
+        var query = await connection.QueryAsync<PivotBaseDto>(sql, new { BeginDate = beginDate, EndDate = endDate });
+
+        return query.ToList();
     }
 
     public async Task<GetPivotTransactionsDto> GetAllPivotTransactionsAsync(DateOnly beginDate, DateOnly endDate)

@@ -2,6 +2,7 @@
 using BenchmarkDotNet.Running;
 using Dapper;
 using Konyvelo.Data;
+using Konyvelo.Data.Dtos;
 using Microsoft.EntityFrameworkCore;
 
 namespace Konyvelo.Benchmark;
@@ -20,9 +21,10 @@ internal class Program
 [MemoryDiagnoser]
 public class SqlTestClass
 {
-    const string Path = "D:\\personal\\penz\\konyvelo.sqlite";
+    const string Path = "D:\\personal\\penz\\konyvelo_test.sqlite";
     const string ConnectionString = $"Data Source={Path}";
 
+    private KonyveloDbContext context;
     KonyveloCrudService service;
 
     public SqlTestClass()
@@ -31,19 +33,27 @@ public class SqlTestClass
         var builder = new DbContextOptionsBuilder<KonyveloDbContext>();
         builder.UseSqlite(ConnectionString);
         var options = builder.Options;
-        var context = new KonyveloDbContext(options);
+        context = new KonyveloDbContext(options);
         service = new KonyveloCrudService(context, ConnectionString);
     }
 
     [Benchmark]
     public async Task TestEf()
     {
-        await this.service.GetAllTransactionsAsync();
+        await this.service.CreateCurrencyAsync(new CreateCurrencyDto()
+        {
+            Code = "HUF"
+        });
+        await context.Currencies.ExecuteDeleteAsync();
     }
 
     [Benchmark]
     public async Task TestSql()
     {
-        await this.service.GetAllTransactionsAsync2();
+        await this.service.CreateCurrencyAsync2(new CreateCurrencyDto()
+        {
+            Code = "HUF"
+        });
+        await context.Currencies.ExecuteDeleteAsync();
     }
 }
