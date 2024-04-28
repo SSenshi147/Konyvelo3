@@ -1,10 +1,10 @@
 ﻿@page "/transactions"
 @using System.Globalization;
-@using Konyvelo.Domain
+@using Konyvelo.Data.Dtos
 
 <h3>Transactions</h3>
 
-<DataGrid TItem="Transaction"
+<DataGrid TItem="GetTransactionDto"
           Data="this._transactions"
           Editable
           EditMode="DataGridEditMode.Inline"
@@ -24,15 +24,15 @@
           RowInserted="this.AddTransaction"
           RowUpdated="this.UpdateTransaction"
           RowRemoved="this.DeleteTransaction"
-          NewItemCreator="() => new Transaction(){Date = new DateOnly(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day), AccountId = _wallets.FirstOrDefault()?.Id ?? 0}"
+          NewItemCreator="() => new GetTransactionDto(){Date = new DateOnly(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day), AccountId = _accounts.FirstOrDefault()?.Id ?? 0}"
           Filterable=true>
     <DataGridColumns>
-        <DataGridDateColumn Field="@nameof(Transaction.Date)" Caption="Date" Editable>
+        <DataGridDateColumn Field="@nameof(GetTransactionDto.Date)" Caption="Date" Editable>
             <DisplayTemplate>
                 @(context.Date.ToString("yyyy.MM.dd"))
             </DisplayTemplate>
         </DataGridDateColumn>
-        <DataGridColumn Field="@nameof(Transaction.Category)" Caption="Category" Editable>
+        <DataGridColumn Field="@nameof(GetTransactionDto.Category)" Caption="Category" Editable>
             <DisplayTemplate>
                 @context.Category
             </DisplayTemplate>
@@ -48,7 +48,7 @@
                 </Autocomplete>
             </EditTemplate>
         </DataGridColumn>
-        <DataGridColumn Field="@nameof(Transaction.Info)" Caption="Name" Editable>
+        <DataGridColumn Field="@nameof(GetTransactionDto.Info)" Caption="Name" Editable>
             <DisplayTemplate>
                 @context.Info
             </DisplayTemplate>
@@ -64,14 +64,14 @@
                 </Autocomplete>
             </EditTemplate>
         </DataGridColumn>
-            <DataGridColumn Field="@(nameof(Transaction.AccountId))" Caption="Account" Editable>
-                <DisplayTemplate>
-                    @context.Account.Name
-                </DisplayTemplate>
-                <EditTemplate>
-                    <SelectList TItem="Account"
+        <DataGridColumn Field="@(nameof(GetTransactionDto.AccountId))" Caption="Account" Editable>
+            <DisplayTemplate>
+                @context.AccountName
+            </DisplayTemplate>
+            <EditTemplate>
+                <SelectList TItem="GetAccountDto"
                             TValue="int"
-                            Data="this._wallets"
+                            Data="this._accounts"
                             TextField="@(x => x.Name)"
                             ValueField="@(x => x.Id)"
                             SelectedValue="@((int)context.CellValue)"
@@ -79,69 +79,77 @@
                             DefaultItemValue="0"
                             DefaultItemText="Select transaction"
                             DefaultItemDisabled=true>
-                    </SelectList>
-                </EditTemplate>
-            </DataGridColumn>
-            <DataGridNumericColumn Decimals=2 DecimalSeparator="," Field="@nameof(Transaction.Total)" Caption="Total" Editable TextAlignment="TextAlignment.End">
-                <DisplayTemplate>
-                    @context.Total.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) @context.Account.Currency.Code
-                </DisplayTemplate>
-            </DataGridNumericColumn>
-            <DataGridCommandColumn PreventRowClick>
-                <NewCommandTemplate>
-                    <Button Color="Color.Success" Clicked="@context.Clicked">@context.LocalizationString</Button>
-                </NewCommandTemplate>
-                <EditCommandTemplate>
-                    <Button Color="Color.Primary" Clicked="@context.Clicked">@context.LocalizationString</Button>
-                </EditCommandTemplate>
-                <SaveCommandTemplate>
-                    <Button Type="ButtonType.Submit" PreventDefaultOnSubmit Color="Color.Primary" Clicked="context.Clicked">@context.LocalizationString</Button>
-                </SaveCommandTemplate>
-                <DeleteCommandTemplate>
-                    <Button Color="Color.Danger" Clicked="@context.Clicked">@context.LocalizationString</Button>
-                </DeleteCommandTemplate>
-                <CancelCommandTemplate>
-                    <Button Color="Color.Secondary" Clicked="@context.Clicked">@context.LocalizationString</Button>
-                </CancelCommandTemplate>
-                <ClearFilterCommandTemplate>
-                    <Button Color="Color.Warning" Clicked="@context.Clicked">@context.LocalizationString</Button>
-                </ClearFilterCommandTemplate>
-            </DataGridCommandColumn>
-        </DataGridColumns>
-    </DataGrid>
+                </SelectList>
+            </EditTemplate>
+        </DataGridColumn>
+        @* TODO *@
+        <DataGridNumericColumn Decimals=2 DecimalSeparator="," Field="@nameof(GetTransactionDto.Total)" Caption="Total" Editable TextAlignment="TextAlignment.End">
+            <DisplayTemplate>
+                @context.Total.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) @context.CurrencyCode
+            </DisplayTemplate>
+        </DataGridNumericColumn>
+        <DataGridCommandColumn PreventRowClick>
+            <NewCommandTemplate>
+                <Button Color="Color.Success" Clicked="@context.Clicked">@context.LocalizationString</Button>
+            </NewCommandTemplate>
+            <EditCommandTemplate>
+                <Button Color="Color.Primary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+            </EditCommandTemplate>
+            <SaveCommandTemplate>
+                <Button Type="ButtonType.Submit" PreventDefaultOnSubmit Color="Color.Primary" Clicked="context.Clicked">@context.LocalizationString</Button>
+            </SaveCommandTemplate>
+            <DeleteCommandTemplate>
+                <Button Color="Color.Danger" Clicked="@context.Clicked">@context.LocalizationString</Button>
+            </DeleteCommandTemplate>
+            <CancelCommandTemplate>
+                <Button Color="Color.Secondary" Clicked="@context.Clicked">@context.LocalizationString</Button>
+            </CancelCommandTemplate>
+            <ClearFilterCommandTemplate>
+                <Button Color="Color.Warning" Clicked="@context.Clicked">@context.LocalizationString</Button>
+            </ClearFilterCommandTemplate>
+        </DataGridCommandColumn>
+    </DataGridColumns>
+</DataGrid>
 
-    @code {
-    private List<Transaction> _transactions = new();
-    private List<Account> _wallets = new();
+@code {
+    private List<GetTransactionDto> _transactions = [];
+    private List<GetAccountDto> _accounts = [];
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
-        await LoadWallets();
+        await LoadAccounts();
         await LoadTransactions();
     }
 
     private async Task LoadTransactions()
     {
-        _transactions = await _konyveloService.GetAllTransactions();
+        _transactions = await _konyveloService.GetAllTransactionsAsync();
         _transactions = _transactions.OrderByDescending(x => x.Date).ToList();
     }
 
-    private async Task LoadWallets()
+    private async Task LoadAccounts()
     {
-        _wallets = await _konyveloService.GetAllWallets();
+        _accounts = await _konyveloService.GetAllAccountsAsync();
     }
 
-    private async Task AddTransaction(SavedRowItem<Transaction, Dictionary<string, object>> savedRowItem)
+    private async Task AddTransaction(SavedRowItem<GetTransactionDto, Dictionary<string, object>> savedRowItem)
     {
         var transaction = savedRowItem.Item;
-        await _konyveloService.CreateTransaction(new CreateTransactionModel(transaction.AccountId, transaction.Category, transaction.Total, transaction.Date, transaction.Info));
+        await _konyveloService.CreateTransactionAsync(new CreateTransactionDto()
+        {
+            AccountId = transaction.AccountId,
+            Category = transaction.Category,
+            Date = transaction.Date,
+            Info = transaction.Info,
+            Total = transaction.Total
+        });
 
         await LoadTransactions();
     }
 
-    private async Task UpdateTransaction(SavedRowItem<Transaction, Dictionary<string, object>> savedRowItem)
+    private async Task UpdateTransaction(SavedRowItem<GetTransactionDto, Dictionary<string, object>> savedRowItem)
     {
         var transaction = savedRowItem.Item;
         var changes = savedRowItem.Values;
@@ -151,15 +159,23 @@
             property?.SetValue(transaction, change.Value);
         }
 
-        await _konyveloService.UpdateTransaction(transaction);
-        
+        await _konyveloService.UpdateTransactionAsync(new UpdateTransactionDto()
+        {
+            AccountId = transaction.AccountId,
+            Category = transaction.Category,
+            Date = transaction.Date,
+            Info = transaction.Info,
+            Id = transaction.Id,
+            Total = transaction.Total
+        });
+
         await LoadTransactions();
     }
 
-    private async Task DeleteTransaction(Transaction transaction)
+    private async Task DeleteTransaction(GetTransactionDto transaction)
     {
-        await _konyveloService.DeleteTransaction(transaction);
-        
+        await _konyveloService.DeleteTransactionAsync(transaction.Id);
+
         await LoadTransactions();
     }
 }

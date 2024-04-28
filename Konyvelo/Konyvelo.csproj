@@ -18,6 +18,7 @@
 		<PackageReference Include="Blazorise.Components" Version="1.5.1" />
 		<PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.5.1" />
 		<PackageReference Include="Blazorise.DataGrid" Version="1.5.1" />
+		<PackageReference Include="Dapper" Version="2.1.35" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.4" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.4">
 		  <PrivateAssets>all</PrivateAssets>
@@ -27,6 +28,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\CsharpGoodies\CsharpGoodies.Common\CsharpGoodies.Common.csproj" />
+	  <ProjectReference Include="..\Konyvelo.Data\Konyvelo.Data.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

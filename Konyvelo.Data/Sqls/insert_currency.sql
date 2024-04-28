@@ -1,0 +1,1 @@
+﻿insert into currencies (code) values (@Code);

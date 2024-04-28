@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Konyvelo.Domain;
+namespace Konyvelo.Data.Models;
 
-public abstract class Entity
+internal abstract class Entity
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
