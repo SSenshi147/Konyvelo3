@@ -1,5 +1,4 @@
 ﻿@page "/pivot"
-@using CsharpGoodies.Common.Extensions;
 @using System.Globalization;
 @using Konyvelo.Domain
 @using Konyvelo.Dtos
@@ -48,7 +47,7 @@
                 <TableHeaderCell>Category</TableHeaderCell>
                 <TableHeaderCell TextAlignment="TextAlignment.End">Sum</TableHeaderCell>
             </TableHeader>
-            @if (!this.pivotTransactions.IsNullOrEmpty())
+            @if (this.pivotTransactions?.Count > 0)
             {
                 <TableBody>
                     @foreach (var pivotTransaction in this.pivotTransactions)

@@ -26,10 +26,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\CsharpGoodies\CsharpGoodies.Common\CsharpGoodies.Common.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <_ContentIncludedByDefault Remove="Components\TodoApp\TodoItem.razor" />
 	  <_ContentIncludedByDefault Remove="Components\TodoApp\TodoItems.razor" />
 	</ItemGroup>

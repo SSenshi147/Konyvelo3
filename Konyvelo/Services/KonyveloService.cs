@@ -1,4 +1,3 @@
-using CsharpGoodies.Common.Extensions;
 using Konyvelo.Data;
 using Konyvelo.Domain;
 using Konyvelo.Dtos;
@@ -129,7 +128,7 @@ public class KonyveloService(KonyveloDbContext context)
     {
         if (dto is null) throw new ArgumentNullException(nameof(dto));
         if (dto.AccountId < 1) throw new ArgumentOutOfRangeException(nameof(dto.AccountId));
-        if (dto.Category.IsNullOrEmpty()) throw new ArgumentException(nameof(dto.Category));
+        if (string.IsNullOrEmpty(dto.Category)) throw new ArgumentException(nameof(dto.Category));
 
         var account = await context.Wallets.FirstOrDefaultAsync(x => x.Id == dto.AccountId) ?? throw new Exception("account not found");
         var transaction = new Transaction()
