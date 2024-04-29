@@ -58,7 +58,6 @@
                                 <Table>
                                     <TableHeader>
                                         <TableHeaderCell>@pivotTransaction.Category</TableHeaderCell>
-                                        @* <TableHeaderCell TextAlignment="TextAlignment.End">@pivotTransaction.Transactions.GetTotal().ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) HUF</TableHeaderCell> *@
                                     </TableHeader>
                                 </Table>
                             </TitleTemplate>
@@ -68,10 +67,6 @@
                                     <TableRow>
                                         <TableRowCell>@currency.CurrencyTotal.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU"))  @currency.CurrencyCode</TableRowCell>
                                     </TableRow>
-                                    @* <TableRow @onclick="@(() => this.selectedTransactions = pivotTransaction.Transactions)">
-                                        <TableRowCell>@currency.Info</TableRowCell>
-                                            <TableRowCell TextAlignment="TextAlignment.End"> @currency.Total.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) @currency.Account.Currency.Code</TableRowCell>
-                                        </TableRow> *@
                                 }
                             </ChildContent>
                         </TableRowGroup>
@@ -88,18 +83,6 @@
         </Table>
     </Column>
 </Row>
-@* @if (!this.selectedTransactions!.IsNullOrEmpty())
-{
-    <Table>
-        @foreach (var transaction in this.selectedTransactions!)
-        {
-            <TableRow>
-                <TableRowCell>@transaction.Name</TableRowCell>
-                <TableRowCell>@transaction.Total.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) HUF</TableRowCell>
-            </TableRow>
-        }
-    </Table>
-} *@
 
 @code{
 
