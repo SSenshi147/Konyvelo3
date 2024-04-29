@@ -58,17 +58,15 @@
                                 <Table>
                                     <TableHeader>
                                         <TableHeaderCell>@pivotTransaction.Category</TableHeaderCell>
-                                        @* <TableHeaderCell TextAlignment="TextAlignment.End">@pivotTransaction.Transactions.GetTotal().ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) HUF</TableHeaderCell> *@
                                     </TableHeader>
                                 </Table>
                             </TitleTemplate>
                             <ChildContent>
-                                @foreach (var transaction in pivotTransaction.Transactions)
+                                @foreach (var currency in pivotTransaction.Transactions)
                                 {
-                                    <TableRow @onclick="@(() => this.selectedTransactions = pivotTransaction.Transactions)">
-                                        <TableRowCell>@transaction.Info</TableRowCell>
-                                            <TableRowCell TextAlignment="TextAlignment.End"> @transaction.Total.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) @transaction.Account.Currency.Code</TableRowCell>
-                                        </TableRow>
+                                    <TableRow>
+                                        <TableRowCell>@currency.CurrencyTotal.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU"))  @currency.CurrencyCode</TableRowCell>
+                                    </TableRow>
                                 }
                             </ChildContent>
                         </TableRowGroup>
@@ -85,22 +83,10 @@
         </Table>
     </Column>
 </Row>
-@* @if (!this.selectedTransactions!.IsNullOrEmpty())
-{
-    <Table>
-        @foreach (var transaction in this.selectedTransactions!)
-        {
-            <TableRow>
-                <TableRowCell>@transaction.Name</TableRowCell>
-                <TableRowCell>@transaction.Total.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) HUF</TableRowCell>
-            </TableRow>
-        }
-    </Table>
-} *@
 
 @code{
 
-    private List<PivotTransaction> pivotTransactions = new();
+    private List<PivotTransactionCategory> pivotTransactions = [];
     private DateOnly begin = new DateOnly(DateTime.Today.Year, DateTime.Today.Month, 1);
 
     private DateOnly end = new DateOnly(DateTime.Today.Year, DateTime.Today.Month,
@@ -119,12 +105,10 @@
     private async Task UpdatePivot()
     {
         var pivot = await _konyveloService.GetPivotTransactions(this.begin, this.end);
-        
-        this.pivotTransactions = pivot.PivotTransactions.Where(x => x.Transactions.GetTotal() != 0)
-            .OrderBy(x => x.Category).ToList();
-        
-        this.grandTotal = this.pivotTransactions.Where(x => x.Transactions.GetTotal() != 0)
-            .Sum(x => x.Transactions.GetTotal());
+
+        this.pivotTransactions = pivot.DisplayTransactions;
+        // this.grandTotal = this.pivotTransactions.Where(x => x.Transactions.GetTotal() != 0)
+        // .Sum(x => x.Transactions.GetTotal());
     }
 
     private async Task PreviousMonth()
