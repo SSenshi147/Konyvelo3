@@ -1,13 +1,17 @@
-﻿using Konyvelo.Domain;
+﻿using Konyvelo.Logic.Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace Konyvelo.Data;
-public class KonyveloDbContext : DbContext
+namespace Konyvelo.Logic.Data;
+internal class KonyveloDbContext : DbContext
 {
     public DbSet<Currency> Currencies { get; set; }
-    public DbSet<Account> Wallets { get; set; }
+    public DbSet<Account> Accounts { get; set; }
     public DbSet<Transaction> Transactions { get; set; }
 
+    public KonyveloDbContext()
+    {
+    }
+    
     public KonyveloDbContext(DbContextOptions<KonyveloDbContext> options) : base(options)
     {
     }

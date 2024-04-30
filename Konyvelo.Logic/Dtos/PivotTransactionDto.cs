@@ -1,4 +1,4 @@
-namespace Konyvelo.Dtos;
+namespace Konyvelo.Logic.Dtos;
 
 public class PivotTransactionDto
 {

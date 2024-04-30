@@ -30,4 +30,8 @@
 	  <_ContentIncludedByDefault Remove="Components\TodoApp\TodoItems.razor" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\Konyvelo.Logic\Konyvelo.Logic.csproj" />
+	</ItemGroup>
+
 </Project>

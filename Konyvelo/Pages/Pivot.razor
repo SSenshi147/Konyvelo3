@@ -1,7 +1,6 @@
 ﻿@page "/pivot"
 @using System.Globalization;
-@using Konyvelo.Domain
-@using Konyvelo.Dtos
+@using Konyvelo.Logic.Dtos
 
 <h3>Pivot</h3>
 
@@ -92,7 +91,6 @@
         DateTime.DaysInMonth(DateTime.Today.Year, DateTime.Today.Month));
 
     private decimal grandTotal;
-    private List<Transaction>? selectedTransactions;
 
     protected override async Task OnInitializedAsync()
     {
@@ -103,8 +101,7 @@
 
     private async Task UpdatePivot()
     {
-        var pivot = await _konyveloService.GetPivotTransactions(this.begin, this.end);
-
+        var pivot = await _konyveloService.GetAllPivotTransactionsAsync(this.begin, this.end);
         this.pivotTransactions = pivot.DisplayTransactions;
         // this.grandTotal = this.pivotTransactions.Where(x => x.Transactions.GetTotal() != 0)
         // .Sum(x => x.Transactions.GetTotal());

@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Konyvelo.Domain;
+namespace Konyvelo.Logic.Domain;
 
 [Table("accounts")]
-public class Account : Entity
+internal class Account : Entity
 {
     [Column("name")]
     public string Name { get; set; } = string.Empty;

@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Konyvelo.Domain;
+namespace Konyvelo.Logic.Domain;
 
 [Table("transactions")]
-public class Transaction : Entity
+internal class Transaction : Entity
 {
     [Column("category")]
     public string Category { get; set; } = string.Empty;
