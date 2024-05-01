@@ -12,29 +12,48 @@
         <Column>
             <DatePicker TValue="@DateOnly"
                         Date="@this.begin"
-                        DateChanged="@(async x => {this.begin = x; await this.UpdatePivot();})"></DatePicker>
+                        DateChanged="@(async x => { this.begin = x; await this.UpdatePivot(); })">
+            </DatePicker>
         </Column>
         <Column>
             <DatePicker TValue="@DateOnly"
                         Date="@this.end"
-                        DateChanged="@(async x => {this.end = x; await this.UpdatePivot();})"></DatePicker>
+                        DateChanged="@(async x => { this.end = x; await this.UpdatePivot(); })">
+            </DatePicker>
         </Column>
         <Column>
             <Buttons>
-                <Button @onclick=@(async() => await this.PreviousMonth()) Outline=true TextAlignment="TextAlignment.Center" Color="Color.Primary">Previous month</Button>
-                <Button @onclick=@(async() => await this.CurrentMonth()) Outline=true TextAlignment="TextAlignment.Center" Color="Color.Primary">Current month</Button>
-                <Button @onclick=@(async() => await this.NextMonth()) Outline=true TextAlignment="TextAlignment.Center" Color="Color.Primary">Next month</Button>
+                <Button @onclick=@(async () => await this.PreviousMonth()) Outline=true TextAlignment="TextAlignment.Center" Color="Color.Primary">Previous month</Button>
+                <Button @onclick=@(async () => await this.CurrentMonth()) Outline=true TextAlignment="TextAlignment.Center" Color="Color.Primary">Current month</Button>
+                <Button @onclick=@(async () => await this.NextMonth()) Outline=true TextAlignment="TextAlignment.Center" Color="Color.Primary">Next month</Button>
             </Buttons>
         </Column>
         <Column>
             <Buttons>
-                <Button @onclick=@(async() => await this.PreviousYear()) Outline=true TextAlignment="TextAlignment.Center" Color="Color.Primary">Previous year</Button>
-                <Button @onclick=@(async() => await this.CurrentYear()) Outline=true TextAlignment="TextAlignment.Center" Color="Color.Primary">Current year</Button>
-                <Button @onclick=@(async() => await this.NextYear()) Outline=true TextAlignment="TextAlignment.Center" Color="Color.Primary">Next year</Button>
+                <Button @onclick=@(async () => await this.PreviousYear()) Outline=true TextAlignment="TextAlignment.Center" Color="Color.Primary">Previous year</Button>
+                <Button @onclick=@(async () => await this.CurrentYear()) Outline=true TextAlignment="TextAlignment.Center" Color="Color.Primary">Current year</Button>
+                <Button @onclick=@(async () => await this.NextYear()) Outline=true TextAlignment="TextAlignment.Center" Color="Color.Primary">Next year</Button>
             </Buttons>
         </Column>
         <Column>
-            <Button @onclick=@(async() => await this.AllTime()) Outline=true TextAlignment="TextAlignment.Center" Color="Color.Primary">Alltime</Button>
+            <Button @onclick=@(async () => await this.AllTime()) Outline=true TextAlignment="TextAlignment.Center" Color="Color.Primary">Alltime</Button>
+        </Column>
+        <Column>
+            <Table>
+                <TableRow>
+                    <TableHeaderCell>
+                        <b>TOTAL</b>
+                    </TableHeaderCell>
+                </TableRow>
+                @foreach (var grandTotal in _grandTotalDtos)
+                {
+                    <TableRow>
+                        <TableRowCell TextAlignment="TextAlignment.End">
+                            @grandTotal.GrandTotal.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) @grandTotal.CurrencyCode
+                        </TableRowCell>
+                    </TableRow>
+                }
+            </Table>
         </Column>
     </Column>
     <Column ColumnSize="ColumnSize.IsHalf">
@@ -63,20 +82,13 @@
                                 @foreach (var currency in pivotTransaction.Transactions)
                                 {
                                     <TableRow>
-                                        <TableRowCell>@currency.CurrencyTotal.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU"))  @currency.CurrencyCode</TableRowCell>
+                                        <TableRowCell>@currency.CurrencyTotal.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) @currency.CurrencyCode</TableRowCell>
                                     </TableRow>
                                 }
                             </ChildContent>
                         </TableRowGroup>
-
                     }
                 </TableBody>
-                <TableFooter>
-                    <TableRow>
-                        <TableRowCell><b>TOTAL</b></TableRowCell>
-                        <TableRowCell TextAlignment="TextAlignment.End"><b>@this.grandTotal.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) HUF</b></TableRowCell>
-                    </TableRow>
-                </TableFooter>
             }
         </Table>
     </Column>
@@ -85,12 +97,11 @@
 @code{
 
     private List<PivotTransactionCategory> pivotTransactions = [];
+    private List<GrandTotalDto> _grandTotalDtos = [];
     private DateOnly begin = new DateOnly(DateTime.Today.Year, DateTime.Today.Month, 1);
 
     private DateOnly end = new DateOnly(DateTime.Today.Year, DateTime.Today.Month,
         DateTime.DaysInMonth(DateTime.Today.Year, DateTime.Today.Month));
-
-    private decimal grandTotal;
 
     protected override async Task OnInitializedAsync()
     {
@@ -103,8 +114,7 @@
     {
         var pivot = await _konyveloService.GetAllPivotTransactionsAsync(this.begin, this.end);
         this.pivotTransactions = pivot.DisplayTransactions;
-        // this.grandTotal = this.pivotTransactions.Where(x => x.Transactions.GetTotal() != 0)
-        // .Sum(x => x.Transactions.GetTotal());
+        _grandTotalDtos = pivot.GrandTotals;
     }
 
     private async Task PreviousMonth()
