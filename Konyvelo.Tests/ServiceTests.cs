@@ -1,9 +1,12 @@
+using System.Collections;
 using Konyvelo.Logic.Data;
 using Konyvelo.Logic.Dtos;
+using Konyvelo.Logic.Exceptions;
 using Konyvelo.Logic.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace Konyvelo.Tests;
+
 public class ServiceTests
 {
     private const string Path = "D:\\personal\\penz\\konyvelo_test.sqlite";
@@ -21,7 +24,7 @@ public class ServiceTests
         var builder = new DbContextOptionsBuilder<KonyveloDbContext>();
         builder.UseSqlite(ConnectionString);
         _options = builder.Options;
-        
+
         await using var context = new KonyveloDbContext(_options);
         if ((await context.Database.GetPendingMigrationsAsync()).Any())
         {
@@ -61,6 +64,22 @@ public class ServiceTests
         Assert.That(currencies[0].Total, Is.EqualTo(0));
     }
 
+    [TestCaseSource(nameof(CreateCurrencyShouldThrowData))]
+    public void CreateCurrency_ShouldThrow(CreateCurrencyDto dto, Type exceptionType)
+    {
+        var service = GetService();
+        Assert.ThrowsAsync(exceptionType, async () => await service.CreateCurrencyAsync(dto));
+    }
+
+    public static IEnumerable CreateCurrencyShouldThrowData
+    {
+        get
+        {
+            yield return new TestCaseData(null, typeof(ArgumentNullException));
+            yield return new TestCaseData(new CreateCurrencyDto(), typeof(ArgumentException));
+        }
+    }
+
     [Test]
     public async Task CreateAccount()
     {
@@ -83,6 +102,27 @@ public class ServiceTests
         Assert.That(accounts[0].Name, Is.EqualTo("OTP"));
         Assert.That(accounts[0].CurrencyCode, Is.EqualTo("HUF"));
         Assert.That(accounts[0].Total, Is.EqualTo(0));
+    }
+
+    [TestCaseSource(nameof(CreateAccountShouldThrowData))]
+    public void CreateAccount_ShouldThrow(CreateAccountDto dto, Type exceptionType)
+    {
+        var service = GetService();
+        Assert.ThrowsAsync(exceptionType, async () => await service.CreateAccountAsync(dto));
+    }
+
+    public static IEnumerable CreateAccountShouldThrowData
+    {
+        get
+        {
+            yield return new TestCaseData(null, typeof(ArgumentNullException));
+            yield return new TestCaseData(new CreateAccountDto(), typeof(ArgumentException));
+            yield return new TestCaseData(new CreateAccountDto()
+            {
+                Name = "asd",
+                CurrencyId = 1
+            }, typeof(NotFoundException));
+        }
     }
 
     [Test]
@@ -119,6 +159,27 @@ public class ServiceTests
         Assert.That(transactions[0].Category, Is.EqualTo("kaja"));
         Assert.That(transactions[0].Info, Is.EqualTo("pizza"));
         Assert.That(transactions[0].Date, Is.EqualTo(DateOnly.FromDateTime(DateTime.Today)));
+    }
+
+    [TestCaseSource(nameof(CreateTransactionShouldThrowData))]
+    public void CreateTransaction_ShouldThrow(CreateTransactionDto dto, Type exceptionType)
+    {
+        var service = GetService();
+        Assert.ThrowsAsync(exceptionType, async () => await service.CreateTransactionAsync(dto));
+    }
+
+    public static IEnumerable CreateTransactionShouldThrowData
+    {
+        get
+        {
+            yield return new TestCaseData(null, typeof(ArgumentNullException));
+            yield return new TestCaseData(new CreateTransactionDto(), typeof(ArgumentException));
+            yield return new TestCaseData(new CreateTransactionDto()
+            {
+                Category = "asd",
+                AccountId = 1
+            }, typeof(NotFoundException));
+        }
     }
 
     [Test]

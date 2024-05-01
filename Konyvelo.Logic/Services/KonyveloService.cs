@@ -1,6 +1,7 @@
 using Konyvelo.Logic.Data;
 using Konyvelo.Logic.Domain;
 using Konyvelo.Logic.Dtos;
+using Konyvelo.Logic.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Konyvelo.Logic.Services;
@@ -29,15 +30,6 @@ public interface IKonyveloService
 
 internal class KonyveloService(KonyveloDbContext context) : IKonyveloService
 {
-    public async Task<List<Transaction>> GetAllTransactions()
-    {
-        return await context
-            .Transactions
-            .Include(x => x.Account)
-            .ThenInclude(x => x.Currency)
-            .ToListAsync();
-    }
-
     public async Task<List<GetCurrencyDto>> GetAllCurrenciesAsync()
     {
         var list = await context.Currencies.Include(x => x.Accounts).ThenInclude(x => x.Transactions).ToListAsync();
@@ -100,7 +92,8 @@ internal class KonyveloService(KonyveloDbContext context) : IKonyveloService
         ArgumentNullException.ThrowIfNull(dto);
         ArgumentException.ThrowIfNullOrEmpty(dto.Name);
 
-        var currency = await context.Currencies.SingleOrDefaultAsync(x => x.Id == dto.CurrencyId) ?? throw new Exception("currency not found");
+        var currency = await context.Currencies.SingleOrDefaultAsync(x => x.Id == dto.CurrencyId) ??
+                       throw new NotFoundException(dto.CurrencyId, nameof(Currency));
         var model = new Account()
         {
             Currency = currency,
@@ -116,7 +109,8 @@ internal class KonyveloService(KonyveloDbContext context) : IKonyveloService
         ArgumentNullException.ThrowIfNull(dto);
         ArgumentException.ThrowIfNullOrEmpty(dto.Category);
 
-        var account = await context.Accounts.SingleOrDefaultAsync(x => x.Id == dto.AccountId) ?? throw new Exception("exception not found");
+        var account = await context.Accounts.SingleOrDefaultAsync(x => x.Id == dto.AccountId) ??
+                      throw new NotFoundException(dto.AccountId, nameof(Account));
         var model = new Transaction()
         {
             Account = account,
@@ -132,8 +126,8 @@ internal class KonyveloService(KonyveloDbContext context) : IKonyveloService
 
     public async Task UpdateCurrencyAsync(UpdateCurrencyDto dto)
     {
-        var currency = await context.Currencies.SingleOrDefaultAsync(x => x.Id == dto.Id);
-        if (currency is null) return;
+        var currency = await context.Currencies.SingleOrDefaultAsync(x => x.Id == dto.Id) ??
+                       throw new NotFoundException(dto.Id, nameof(Currency));
 
         if (!string.IsNullOrEmpty(dto.Code) && currency.Code != dto.Code)
         {
@@ -146,8 +140,8 @@ internal class KonyveloService(KonyveloDbContext context) : IKonyveloService
 
     public async Task UpdateAccountAsync(UpdateAccountDto dto)
     {
-        var account = await context.Accounts.SingleOrDefaultAsync(x => x.Id == dto.Id);
-        if (account is null) return;
+        var account = await context.Accounts.SingleOrDefaultAsync(x => x.Id == dto.Id) ??
+                      throw new NotFoundException(dto.Id, nameof(Account));
 
         if (!string.IsNullOrEmpty(dto.Name) && account.Name != dto.Name)
         {
@@ -156,7 +150,8 @@ internal class KonyveloService(KonyveloDbContext context) : IKonyveloService
 
         if (dto.CurrencyId is not null && account.CurrencyId != dto.CurrencyId)
         {
-            var currency = await context.Currencies.SingleOrDefaultAsync(x => x.Id == dto.CurrencyId) ?? throw new Exception("currency not found");
+            var currency = await context.Currencies.SingleOrDefaultAsync(x => x.Id == dto.CurrencyId) ??
+                           throw new NotFoundException(dto.CurrencyId.Value, nameof(Currency));
 
             account.Currency = currency;
             account.CurrencyId = dto.CurrencyId.Value;
@@ -168,8 +163,8 @@ internal class KonyveloService(KonyveloDbContext context) : IKonyveloService
 
     public async Task UpdateTransactionAsync(UpdateTransactionDto dto)
     {
-        var transaction = await context.Transactions.SingleOrDefaultAsync(x => x.Id == dto.Id);
-        if (transaction is null) return;
+        var transaction = await context.Transactions.SingleOrDefaultAsync(x => x.Id == dto.Id) ??
+                          throw new NotFoundException(dto.Id, nameof(Transaction));
 
         if (!string.IsNullOrEmpty(dto.Category) && transaction.Category != dto.Category)
         {
@@ -193,7 +188,8 @@ internal class KonyveloService(KonyveloDbContext context) : IKonyveloService
 
         if (dto.AccountId is not null && transaction.AccountId != dto.AccountId)
         {
-            var account = await context.Accounts.SingleOrDefaultAsync(x => x.Id == dto.AccountId) ?? throw new Exception("account not found");
+            var account = await context.Accounts.SingleOrDefaultAsync(x => x.Id == dto.AccountId) ??
+                          throw new NotFoundException(dto.AccountId.Value, nameof(Account));
 
             transaction.Account = account;
             transaction.AccountId = dto.AccountId.Value;
@@ -205,8 +201,8 @@ internal class KonyveloService(KonyveloDbContext context) : IKonyveloService
 
     public async Task DeleteCurrencyAsync(int currencyId)
     {
-        var currency = await context.Currencies.SingleOrDefaultAsync(x => x.Id == currencyId);
-        if (currency is null) return;
+        var currency = await context.Currencies.SingleOrDefaultAsync(x => x.Id == currencyId) ??
+                       throw new NotFoundException(currencyId, nameof(Currency));
 
         context.Currencies.Remove(currency);
         await context.SaveChangesAsync();
@@ -214,8 +210,8 @@ internal class KonyveloService(KonyveloDbContext context) : IKonyveloService
 
     public async Task DeleteAccountAsync(int accountId)
     {
-        var account = await context.Accounts.SingleOrDefaultAsync(x => x.Id == accountId);
-        if (account is null) return;
+        var account = await context.Accounts.SingleOrDefaultAsync(x => x.Id == accountId) ??
+                      throw new NotFoundException(accountId, nameof(Account));
 
         context.Accounts.Remove(account);
         await context.SaveChangesAsync();
@@ -223,8 +219,8 @@ internal class KonyveloService(KonyveloDbContext context) : IKonyveloService
 
     public async Task DeleteTransactionAsync(int transactionId)
     {
-        var transaction = await context.Transactions.SingleOrDefaultAsync(x => x.Id == transactionId);
-        if (transaction is null) return;
+        var transaction = await context.Transactions.SingleOrDefaultAsync(x => x.Id == transactionId) ??
+                          throw new NotFoundException(transactionId, nameof(Transaction));
 
         context.Transactions.Remove(transaction);
         await context.SaveChangesAsync();
@@ -240,21 +236,21 @@ internal class KonyveloService(KonyveloDbContext context) : IKonyveloService
             .ToListAsync();
 
         var categories = transactions
-             .GroupBy(x => x.Category)
-             .Select(x => new PivotTransactionCategory()
-             {
-                 Category = x.Key,
-                 Transactions = x.GroupBy(y => y.Account.Currency).Select(y => new PivotTransactionCurrency()
-                 {
-                     CurrencyCode = y.Key.Code,
-                     Transactions = y.Select(z => new PivotTransactionInfo()
-                     {
-                         Date = z.Date,
-                         Info = z.Info ?? "N/A",
-                         Total = z.Total
-                     }).ToList()
-                 }).ToList()
-             }).ToList();
+            .GroupBy(x => x.Category)
+            .Select(x => new PivotTransactionCategory()
+            {
+                Category = x.Key,
+                Transactions = x.GroupBy(y => y.Account.Currency).Select(y => new PivotTransactionCurrency()
+                {
+                    CurrencyCode = y.Key.Code,
+                    Transactions = y.Select(z => new PivotTransactionInfo()
+                    {
+                        Date = z.Date,
+                        Info = z.Info ?? "N/A",
+                        Total = z.Total
+                    }).ToList()
+                }).ToList()
+            }).ToList();
 
         var response = new PivotTransactionDto()
         {
@@ -269,141 +265,9 @@ internal class KonyveloService(KonyveloDbContext context) : IKonyveloService
         var query = await context
             .Transactions
             .OrderBy(x => x.Date)
+            .Select(x => x.Date)
             .FirstOrDefaultAsync();
 
-        return query.Date;
-    }
-
-    public async Task<PivotTransactionDto> GetPivotTransactions(DateOnly beginDate, DateOnly endDate)
-    {
-        var transactions = await context
-            .Transactions
-            .Include(x => x.Account)
-            .ThenInclude(x => x.Currency)
-            .Where(x => x.Date >= beginDate && x.Date <= endDate)
-            .ToListAsync();
-
-        var categories = transactions
-             .GroupBy(x => x.Category)
-             .Select(x => new PivotTransactionCategory()
-             {
-                 Category = x.Key,
-                 Transactions = x.GroupBy(y => y.Account.Currency).Select(y => new PivotTransactionCurrency()
-                 {
-                     CurrencyCode = y.Key.Code,
-                     Transactions = y.Select(z => new PivotTransactionInfo()
-                     {
-                         Date = z.Date,
-                         Info = z.Info ?? "N/A",
-                         Total = z.Total
-                     }).ToList()
-                 }).ToList()
-             }).ToList();
-
-        var response = new PivotTransactionDto()
-        {
-            PivotTransactions = categories
-        };
-
-        return response;
-    }
-
-    public async Task<List<Account>> GetAllWallets()
-    {
-        return await context
-            .Accounts
-            .Include(x => x.Transactions)
-            .Include(x => x.Currency)
-            .OrderBy(x => x.Name)
-            .ToListAsync();
-    }
-
-    public async Task<List<Currency>> GetAllCurrencies()
-    {
-        return await context.Currencies.ToListAsync();
-    }
-
-    public async Task CreateCurrency(Currency currency)
-    {
-        await context.Currencies.AddAsync(currency);
-        await context.SaveChangesAsync();
-    }
-
-    public async Task CreateWallet(CreateAccountModel dto)
-    {
-        if (dto is null) throw new ArgumentNullException(nameof(dto));
-        if (dto.CurrencyId < 0) throw new ArgumentOutOfRangeException(nameof(dto.CurrencyId));
-        if (string.IsNullOrEmpty(dto.Name)) throw new ArgumentException(nameof(dto.Name));
-
-        var currency = await context.Currencies.FirstOrDefaultAsync(x => x.Id == dto.CurrencyId) ?? throw new Exception("currency not found");
-        var account = new Account()
-        {
-            CurrencyId = dto.CurrencyId,
-            Currency = currency,
-            Name = dto.Name
-        };
-
-        await context.Accounts.AddAsync(account);
-        await context.SaveChangesAsync();
-    }
-
-    public async Task UpdateCurrency(Currency currency)
-    {
-        context.Currencies.Update(currency);
-        await context.SaveChangesAsync();
-    }
-
-    public async Task UpdateWallet(Account account)
-    {
-        context.Accounts.Update(account);
-        await context.SaveChangesAsync();
-    }
-
-    public async Task DeleteCurrency(Currency currency)
-    {
-        context.Currencies.Remove(currency);
-        await context.SaveChangesAsync();
-    }
-
-    public async Task DeleteWallet(Account account)
-    {
-        context.Accounts.Remove(account);
-        await context.SaveChangesAsync();
-    }
-
-    public async Task CreateTransaction(CreateTransactionModel dto)
-    {
-        if (dto is null) throw new ArgumentNullException(nameof(dto));
-        if (dto.AccountId < 1) throw new ArgumentOutOfRangeException(nameof(dto.AccountId));
-        if (string.IsNullOrEmpty(dto.Category)) throw new ArgumentException(nameof(dto.Category));
-
-        var account = await context.Accounts.FirstOrDefaultAsync(x => x.Id == dto.AccountId) ?? throw new Exception("account not found");
-        var transaction = new Transaction()
-        {
-            Account = account,
-            AccountId = dto.AccountId,
-            Category = dto.Category,
-            Date = dto.Date,
-            Info = dto.Info,
-            Total = dto.Total
-        };
-
-        await context.Transactions.AddAsync(transaction);
-        await context.SaveChangesAsync();
-    }
-
-    public async Task UpdateTransaction(Transaction transaction)
-    {
-        context.Transactions.Update(transaction);
-        await context.SaveChangesAsync();
-    }
-
-    public async Task DeleteTransaction(Transaction transaction)
-    {
-        context.Transactions.Remove(transaction);
-        await context.SaveChangesAsync();
+        return query;
     }
 }
-
-public record CreateTransactionModel(int AccountId, string Category, decimal Total, DateOnly Date, string? Info);
-public record CreateAccountModel(int CurrencyId, string Name);
