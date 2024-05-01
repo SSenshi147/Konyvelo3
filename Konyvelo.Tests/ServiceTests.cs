@@ -206,6 +206,16 @@ public class ServiceTests
     }
 
     [Test]
+    public void UpdateCurrency_ThrowsNotFound_CurrencyDoesntExist()
+    {
+        var service = GetService();
+        Assert.ThrowsAsync<NotFoundException>(async () => await service.UpdateCurrencyAsync(new UpdateCurrencyDto()
+        {
+            Id = 1
+        }));
+    }
+
+    [Test]
     public async Task UpdateAccount()
     {
         var service = GetService();
@@ -233,6 +243,37 @@ public class ServiceTests
         Assert.That(accounts[0].Name, Is.EqualTo("Revolut"));
         Assert.That(accounts[0].CurrencyCode, Is.EqualTo("HUF"));
         Assert.That(accounts[0].Total, Is.EqualTo(0));
+    }
+
+    [Test]
+    public void UpdateAccount_ThrowsNotFound_AccountDoesntExist()
+    {
+        var service = GetService();
+        Assert.ThrowsAsync<NotFoundException>(async () => await service.UpdateAccountAsync(new UpdateAccountDto()
+        {
+            Id = 1
+        }));
+    }
+
+    [Test]
+    public async Task UpdateAccount_ThrowsNotFound_RelatedCurrencyDoesntExist()
+    {
+        var service = GetService();
+        await service.CreateCurrencyAsync(new CreateCurrencyDto()
+        {
+            Code = "HUF"
+        });
+        var currencies = await service.GetAllCurrenciesAsync();
+        await service.CreateAccountAsync(new CreateAccountDto()
+        {
+            CurrencyId = currencies[0].Id,
+            Name = "OTP"
+        });
+
+        Assert.ThrowsAsync<NotFoundException>(async () => await service.UpdateAccountAsync(new UpdateAccountDto()
+        {
+            Id = 5
+        }));
     }
 
     [Test]
@@ -280,6 +321,48 @@ public class ServiceTests
     }
 
     [Test]
+    public void UpdateTransaction_ThrowsNotFound_TransactionDoesntExist()
+    {
+        var service = GetService();
+        Assert.ThrowsAsync<NotFoundException>(async () => await service.UpdateTransactionAsync(
+            new UpdateTransactionDto()
+            {
+                Id = 1
+            }));
+    }
+
+    [Test]
+    public async Task UpdateTransaction_ThrowsNotFound_RelatedAccountDoesntExist()
+    {
+        var service = GetService();
+        await service.CreateCurrencyAsync(new CreateCurrencyDto()
+        {
+            Code = "HUF"
+        });
+        var currencies = await service.GetAllCurrenciesAsync();
+        await service.CreateAccountAsync(new CreateAccountDto()
+        {
+            CurrencyId = currencies[0].Id,
+            Name = "OTP"
+        });
+        var accounts = await service.GetAllAccountsAsync();
+        await service.CreateTransactionAsync(new CreateTransactionDto()
+        {
+            AccountId = accounts[0].Id,
+            Category = "kaja",
+            Date = DateOnly.FromDateTime(DateTime.Today),
+            Info = "pizza",
+            Total = -3000
+        });
+
+        Assert.ThrowsAsync<NotFoundException>(async () => await service.UpdateTransactionAsync(
+            new UpdateTransactionDto()
+            {
+                Id = 5
+            }));
+    }
+
+    [Test]
     public async Task DeleteCurrency()
     {
         var service = GetService();
@@ -294,6 +377,13 @@ public class ServiceTests
         currencies = await service.GetAllCurrenciesAsync();
         Assert.That(currencies, Is.Not.Null);
         Assert.That(currencies, Is.Empty);
+    }
+
+    [Test]
+    public void DeleteCurrency_ThrowsNotFound_CurrencyDoesntExist()
+    {
+        var service = GetService();
+        Assert.ThrowsAsync<NotFoundException>(async () => await service.DeleteCurrencyAsync(1));
     }
 
     [Test]
@@ -317,6 +407,13 @@ public class ServiceTests
         accounts = await service.GetAllAccountsAsync();
         Assert.That(accounts, Is.Not.Null);
         Assert.That(accounts, Is.Empty);
+    }
+
+    [Test]
+    public void DeleteAccount_ThrowsNotFound_AccountDoesntExist()
+    {
+        var service = GetService();
+        Assert.ThrowsAsync<NotFoundException>(async () => await service.DeleteAccountAsync(1));
     }
 
     [Test]
@@ -349,5 +446,12 @@ public class ServiceTests
         transactions = await service.GetAllTransactionsAsync();
         Assert.That(transactions, Is.Not.Null);
         Assert.That(transactions, Is.Empty);
+    }
+
+    [Test]
+    public void DeleteTransaction_ThrowsNotFound_TransactionDoesntExist()
+    {
+        var service = GetService();
+        Assert.ThrowsAsync<NotFoundException>(async () => await service.DeleteTransactionAsync(1));
     }
 }
