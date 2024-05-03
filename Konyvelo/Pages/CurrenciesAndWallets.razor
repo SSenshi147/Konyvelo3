@@ -97,7 +97,6 @@
                 </SelectList>
             </EditTemplate>
         </DataGridColumn>
-        @* TODO *@
         <DataGridColumn Field="@(nameof(GetAccountDto.Total))" Caption="Total calculated" TextAlignment="TextAlignment.End">
             <DisplayTemplate>
                 @context.Total.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) @context.CurrencyCode
