@@ -1,0 +1,81 @@
+@page "/Transfers"
+@using System.Globalization
+@using Konyvelo.Logic.Dtos
+<h3>Transfers</h3>
+
+<Form Margin="Margin.IsAuto.OnX" Padding="Padding.Is5.OnX" Width="Width.Is50">
+    <Field>
+        <FieldLabel>From</FieldLabel>
+        <FieldBody>
+            <SelectList TItem="GetAccountDto"
+                        TValue="int"
+                        Data="@_accountDtos"
+                        TextField="AccountDisplay"
+                        ValueField="@(x => x.Id)"
+                        @bind-SelectedValue="@(_dto.FromAccountId)">
+            </SelectList>
+        </FieldBody>
+    </Field>
+    <Field>
+        <FieldLabel>To</FieldLabel>
+        <FieldBody>
+            <SelectList TItem="GetAccountDto"
+                        TValue="int"
+                        Data="@_accountDtos"
+                        TextField="AccountDisplay"
+                        ValueField="@(x => x.Id)"
+                        @bind-SelectedValue="@(_dto.ToAccountId)">
+            </SelectList>
+        </FieldBody>
+    </Field>
+    <Field>
+        <FieldLabel>Date</FieldLabel>
+        <FieldBody>
+            <DateEdit TValue="DateOnly"
+                      Date="_dto.Date">
+            </DateEdit>
+        </FieldBody>
+    </Field>
+    <Field>
+        <FieldLabel>Total</FieldLabel>
+        <FieldBody>
+            <NumericPicker TValue="decimal"
+                           @bind-Value="_dto.Total"
+                           Min="1">
+            </NumericPicker>
+        </FieldBody>
+    </Field>
+    <Field>
+        <Button Color="Color.Primary" Clicked="async () => await this.SaveAsync()" Disabled="_disabled">
+            Save
+        </Button>
+    </Field>
+</Form>
+
+@code {
+    private CreateTransferDto _dto = new();
+    private List<GetAccountDto> _accountDtos = [];
+    private bool _disabled = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        _accountDtos = await _konyveloService.GetAllAccountsAsync();
+        
+        if (_accountDtos.Count >= 2)
+        {
+            _dto.FromAccountId = _accountDtos[0].Id;
+            _dto.ToAccountId = _accountDtos[1].Id;
+            _disabled = false;
+        }
+    }
+
+    private Func<GetAccountDto, string> AccountDisplay => x
+        => $"{x.Name} - {x.Total.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU"))} {x.CurrencyCode}";
+
+    private async Task SaveAsync()
+    {
+        await _konyveloService.CreateTransferAsync(_dto);
+    }
+
+}
