@@ -82,7 +82,6 @@
                 </SelectList>
             </EditTemplate>
         </DataGridColumn>
-        @* TODO *@
         <DataGridNumericColumn Decimals=2 DecimalSeparator="," Field="@nameof(GetTransactionDto.Total)" Caption="Total" Editable TextAlignment="TextAlignment.End">
             <DisplayTemplate>
                 @context.Total.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) @context.CurrencyCode

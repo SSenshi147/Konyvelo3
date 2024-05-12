@@ -454,4 +454,51 @@ public class ServiceTests
         var service = GetService();
         Assert.ThrowsAsync<NotFoundException>(async () => await service.DeleteTransactionAsync(1));
     }
+
+    [Test]
+    public async Task CreateTransfer()
+    {
+        var service = GetService();
+        await service.CreateCurrencyAsync(new CreateCurrencyDto()
+        {
+            Code = "HUF"
+        });
+        var currencies = await service.GetAllCurrenciesAsync();
+        await service.CreateAccountAsync(new CreateAccountDto()
+        {
+            CurrencyId = currencies[0].Id,
+            Name = "OTP"
+        });
+        await service.CreateAccountAsync(new CreateAccountDto()
+        {
+            CurrencyId = currencies[0].Id,
+            Name = "Revolut"
+        });
+        var accounts = await service.GetAllAccountsAsync();
+        var otp = accounts.FirstOrDefault(x => x.Name == "OTP");
+        var revolut = accounts.FirstOrDefault(x => x.Name == "Revolut");
+        await service.CreateTransactionAsync(new CreateTransactionDto()
+        {
+            AccountId = otp.Id,
+            Category = "income",
+            Date = DateOnly.FromDateTime(DateTime.Today),
+            Total = 5000
+        });
+
+        await service.CreateTransferAsync(new CreateTransferDto()
+        {
+            Date = DateOnly.FromDateTime(DateTime.Today),
+            FromAccountId = otp.Id,
+            ToAccountId = revolut.Id,
+            Total = 2500
+        });
+
+        accounts = await service.GetAllAccountsAsync();
+        otp = accounts.FirstOrDefault(x => x.Name == "OTP");
+        revolut = accounts.FirstOrDefault(x => x.Name == "Revolut");
+        Assert.That(otp, Is.Not.Null);
+        Assert.That(revolut, Is.Not.Null);
+        Assert.That(otp.Total, Is.EqualTo(2500));
+        Assert.That(revolut.Total, Is.EqualTo(2500));
+    }
 }

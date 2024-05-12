@@ -63,7 +63,6 @@
                FixedHeaderTableHeight="800px">
             <TableHeader>
                 <TableHeaderCell>Category</TableHeaderCell>
-                <TableHeaderCell TextAlignment="TextAlignment.End">Sum</TableHeaderCell>
             </TableHeader>
             @if (this.pivotTransactions?.Count > 0)
             {
@@ -82,7 +81,9 @@
                                 @foreach (var currency in pivotTransaction.Transactions)
                                 {
                                     <TableRow>
-                                        <TableRowCell>@currency.CurrencyTotal.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) @currency.CurrencyCode</TableRowCell>
+                                        <TableRowCell TextAlignment="TextAlignment.End">
+                                            @currency.CurrencyTotal.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) @currency.CurrencyCode
+                                        </TableRowCell>
                                     </TableRow>
                                 }
                             </ChildContent>

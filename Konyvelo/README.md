@@ -29,3 +29,11 @@ sudo chmod 777 /home/marci/konyvelo/linux-x64/Konyvelo
 sudo systemctl start konyvelo
 sudo ufw allow 8888
 ```
+
+blazorise select  
+when databinding make sure to select a value from the initialization code or disable default, because the default value will not be the first from the collection 
+```
+DefaultItemValue="0"
+DefaultItemText="Select transaction"
+DefaultItemDisabled=true>
+```

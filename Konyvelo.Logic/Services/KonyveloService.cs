@@ -26,6 +26,7 @@ public interface IKonyveloService
 
     Task<PivotTransactionDto> GetAllPivotTransactionsAsync(DateOnly beginDate, DateOnly endDate);
     Task<DateOnly> GetFirstTransactionDate();
+    Task CreateTransferAsync(CreateTransferDto dto);
 }
 
 internal class KonyveloService(KonyveloDbContext context) : IKonyveloService
@@ -269,5 +270,47 @@ internal class KonyveloService(KonyveloDbContext context) : IKonyveloService
             .FirstOrDefaultAsync();
 
         return query;
+    }
+
+    public async Task CreateTransferAsync(CreateTransferDto dto)
+    {
+        ArgumentNullException.ThrowIfNull(dto);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(dto.Total);
+        ArgumentException.ThrowIfNullOrEmpty(dto.Category);
+        if (dto.FromAccountId == dto.ToAccountId)
+            throw new InvalidOperationException("account ids are the same");
+
+        var fromAccount = await context.Accounts.SingleOrDefaultAsync(x => x.Id == dto.FromAccountId) ??
+                          throw new NotFoundException(dto.FromAccountId, nameof(Account));
+        var toAccount = await context.Accounts.SingleOrDefaultAsync(x => x.Id == dto.ToAccountId) ??
+                        throw new NotFoundException(dto.ToAccountId, nameof(Account));
+
+        if (fromAccount.CurrencyId != toAccount.CurrencyId)
+            throw new InvalidOperationException("account currency does not match");
+
+        var expense = new Transaction()
+        {
+            Account = fromAccount,
+            AccountId = fromAccount.Id,
+            Category = dto.Category,
+            Date = dto.Date,
+            Total = -Math.Abs(dto.Total),
+            Info = dto.Info
+        };
+        var income = new Transaction()
+        {
+            Account = toAccount,
+            AccountId = toAccount.Id,
+            Category = dto.Category,
+            Date = dto.Date,
+            Total = Math.Abs(dto.Total),
+            Info = dto.Info
+        };
+
+        var dbTransaction = await context.Database.BeginTransactionAsync();
+        await context.Transactions.AddAsync(expense);
+        await context.Transactions.AddAsync(income);
+        await context.SaveChangesAsync();
+        await dbTransaction.CommitAsync();
     }
 }
