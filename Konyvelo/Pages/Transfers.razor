@@ -46,7 +46,27 @@
         </FieldBody>
     </Field>
     <Field>
-        <Button Color="Color.Primary" Clicked="async () => await this.SaveAsync()" Disabled="_disabled">
+        <FieldLabel>Category</FieldLabel>
+        <FieldBody>
+            <TextEdit TValue="string"
+                      @bind-Value="_dto.Category"
+                      Text="@_dto.Category"
+                      TextChanged="s => _dto.Category = s">
+            </TextEdit>
+        </FieldBody>
+    </Field>
+    <Field>
+        <FieldLabel>Info</FieldLabel>
+        <FieldBody>
+            <TextEdit TValue="string?"
+                      @bind-Value="_dto.Info"
+                      Text="@_dto.Info"
+                      TextChanged="s => _dto.Info = s">
+            </TextEdit>
+        </FieldBody>
+    </Field>
+    <Field>
+        <Button Color="Color.Primary" Clicked="async () => await this.SaveAsync()" Disabled="!Enabled">
             Save
         </Button>
     </Field>
@@ -55,18 +75,19 @@
 @code {
     private CreateTransferDto _dto = new();
     private List<GetAccountDto> _accountDtos = [];
-    private bool _disabled = true;
+    private bool _loaded = false;
+    private bool Enabled => _loaded && _accountDtos.Count >= 2 && _dto.FromAccountId != _dto.ToAccountId;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
         _accountDtos = await _konyveloService.GetAllAccountsAsync();
-        
+
         if (_accountDtos.Count >= 2)
         {
             _dto.FromAccountId = _accountDtos[0].Id;
             _dto.ToAccountId = _accountDtos[1].Id;
-            _disabled = false;
+            _loaded = true;
         }
     }
 

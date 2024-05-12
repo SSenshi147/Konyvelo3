@@ -279,7 +279,7 @@ internal class KonyveloService(KonyveloDbContext context) : IKonyveloService
         ArgumentException.ThrowIfNullOrEmpty(dto.Category);
         if (dto.FromAccountId == dto.ToAccountId)
             throw new InvalidOperationException("account ids are the same");
-        
+
         var fromAccount = await context.Accounts.SingleOrDefaultAsync(x => x.Id == dto.FromAccountId) ??
                           throw new NotFoundException(dto.FromAccountId, nameof(Account));
         var toAccount = await context.Accounts.SingleOrDefaultAsync(x => x.Id == dto.ToAccountId) ??
@@ -307,8 +307,10 @@ internal class KonyveloService(KonyveloDbContext context) : IKonyveloService
             Info = dto.Info
         };
 
+        var dbTransaction = await context.Database.BeginTransactionAsync();
         await context.Transactions.AddAsync(expense);
         await context.Transactions.AddAsync(income);
         await context.SaveChangesAsync();
+        await dbTransaction.CommitAsync();
     }
 }
