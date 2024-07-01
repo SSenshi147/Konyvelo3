@@ -1,6 +1,7 @@
 @page "/Transfers"
 @using System.Globalization
 @using Konyvelo.Logic.Dtos
+@inject NavigationManager NavigationManager
 <h3>Transfers</h3>
 
 <Form Margin="Margin.IsAuto.OnX" Padding="Padding.Is5.OnX" Width="Width.Is50">
@@ -32,7 +33,7 @@
         <FieldLabel>Date</FieldLabel>
         <FieldBody>
             <DateEdit TValue="DateOnly"
-                      Date="_dto.Date">
+                      @bind-Date="@(_dto.Date)">
             </DateEdit>
         </FieldBody>
     </Field>
@@ -58,16 +59,23 @@
     <Field>
         <FieldLabel>Info</FieldLabel>
         <FieldBody>
-            <TextEdit TValue="string?"
-                      @bind-Value="_dto.Info"
-                      Text="@_dto.Info"
-                      TextChanged="s => _dto.Info = s">
-            </TextEdit>
+            <Autocomplete TItem="string"
+                          TValue="string"
+                          Data="@(_transactions.GroupBy(x => x.Info).Select(x => x.Key))"
+                          FreeTyping=true
+                          TextField="@(x => x)"
+                          ValueField="@(x => x)"
+                          Search="@((string)_dto.Info)"
+                          SearchChanged="@(x => _dto.Info = x)">
+            </Autocomplete>
         </FieldBody>
     </Field>
     <Field>
         <Button Color="Color.Primary" Clicked="async () => await this.SaveAsync()" Disabled="!Enabled">
             Save
+        </Button>
+        <Button Color="Color.Primary" Clicked="async () => await this.SaveAndReturnAsync()" Disabled="!Enabled">
+            Save and return
         </Button>
     </Field>
 </Form>
@@ -75,6 +83,7 @@
 @code {
     private CreateTransferDto _dto = new();
     private List<GetAccountDto> _accountDtos = [];
+    private List<GetTransactionDto> _transactions = [];
     private bool _loaded = false;
     private bool Enabled => _loaded && _accountDtos.Count >= 2 && _dto.FromAccountId != _dto.ToAccountId;
 
@@ -85,10 +94,18 @@
 
         if (_accountDtos.Count >= 2)
         {
+            await LoadTransactions();
+            _dto = new();
             _dto.FromAccountId = _accountDtos[0].Id;
             _dto.ToAccountId = _accountDtos[1].Id;
             _loaded = true;
         }
+    }
+
+    private async Task LoadTransactions()
+    {
+        _transactions = await _konyveloService.GetAllTransactionsAsync();
+        _transactions = _transactions.OrderByDescending(x => x.Date).ToList();
     }
 
     private Func<GetAccountDto, string> AccountDisplay => x
@@ -97,6 +114,12 @@
     private async Task SaveAsync()
     {
         await _konyveloService.CreateTransferAsync(_dto);
+        await this.OnInitializedAsync();
     }
 
+    private async Task SaveAndReturnAsync()
+    {
+        await _konyveloService.CreateTransferAsync(_dto);
+        this.NavigationManager.NavigateTo("/transactions");
+    }
 }

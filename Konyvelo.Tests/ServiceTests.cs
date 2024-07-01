@@ -9,7 +9,7 @@ namespace Konyvelo.Tests;
 
 public class ServiceTests
 {
-    private const string Path = "D:\\personal\\penz\\konyvelo_test.sqlite";
+    private const string Path = "D:\\personal\\penz_dev\\konyvelo_test.sqlite";
     private const string ConnectionString = $"Data Source={Path}";
 
     private DbContextOptions<KonyveloDbContext> _options;
