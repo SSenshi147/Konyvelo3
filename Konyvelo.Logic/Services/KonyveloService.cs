@@ -3,34 +3,29 @@ using Konyvelo.Logic.Domain;
 using Konyvelo.Logic.Dtos;
 using Konyvelo.Logic.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
 
 namespace Konyvelo.Logic.Services;
 
-public interface IKonyveloService
-{
-    Task<List<GetCurrencyDto>> GetAllCurrenciesAsync();
-    Task<List<GetAccountDto>> GetAllAccountsAsync();
-    Task<List<GetTransactionDto>> GetAllTransactionsAsync();
-
-    Task CreateCurrencyAsync(CreateCurrencyDto dto);
-    Task CreateAccountAsync(CreateAccountDto dto);
-    Task CreateTransactionAsync(CreateTransactionDto dto);
-
-    Task UpdateCurrencyAsync(UpdateCurrencyDto dto);
-    Task UpdateAccountAsync(UpdateAccountDto dto);
-    Task UpdateTransactionAsync(UpdateTransactionDto dto);
-
-    Task DeleteCurrencyAsync(int currencyId);
-    Task DeleteAccountAsync(int accountId);
-    Task DeleteTransactionAsync(int transactionId);
-
-    Task<PivotTransactionDto> GetAllPivotTransactionsAsync(DateOnly beginDate, DateOnly endDate);
-    Task<DateOnly> GetFirstTransactionDate();
-    Task CreateTransferAsync(CreateTransferDto dto);
-}
-
 internal class KonyveloService(KonyveloDbContext context) : IKonyveloService
 {
+    public async Task Export()
+    {
+        // var all = await context.Transactions
+        //     .Include(x => x.Account)
+        //     .ThenInclude(x => x.Currency)
+        //     .OrderBy(x => x.Date)
+        //     .ToListAsync();
+        //
+        // var sb = new StringBuilder();
+        // foreach (var item in all)
+        // {
+        //     sb.AppendLine($"{item.Date:yyyy-MM-dd};{item.Category};{item.Info};{item.Total};{item.Account.Currency.Code};{item.Account.Name}");
+        // }
+
+        // await File.WriteAllTextAsync("out.csv", sb.ToString(), Encoding.UTF8);
+    }
+    
     public async Task<List<GetCurrencyDto>> GetAllCurrenciesAsync()
     {
         var list = await context.Currencies.Include(x => x.Accounts).ThenInclude(x => x.Transactions).ToListAsync();

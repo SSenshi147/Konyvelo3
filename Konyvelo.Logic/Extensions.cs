@@ -22,7 +22,7 @@ public static class ConfigExtensions
 
     public static IServiceCollection ConfigureServices(this IServiceCollection services)
     {
-        services.AddScoped<IKonyveloService, KonyveloService>();
+        services.AddScoped<IKonyveloService, FileKonyveloService>();
 
         return services;
     }

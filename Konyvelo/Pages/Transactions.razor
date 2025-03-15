@@ -3,7 +3,7 @@
 @using Konyvelo.Logic.Dtos
 
 <h3>Transactions</h3>
-
+<Button @onclick="async () => await _konyveloService.Export()">asd</Button>
 <DataGrid TItem="GetTransactionDto"
           Data="this._transactions"
           Editable
@@ -82,7 +82,8 @@
                 </SelectList>
             </EditTemplate>
         </DataGridColumn>
-        <DataGridNumericColumn Decimals=2 DecimalSeparator="," Field="@nameof(GetTransactionDto.Total)" Caption="Total" Editable TextAlignment="TextAlignment.End">
+        <DataGridNumericColumn Decimals=2 DecimalSeparator="," Field="@nameof(GetTransactionDto.Total)" Caption="Total"
+                               Editable TextAlignment="TextAlignment.End">
             <DisplayTemplate>
                 @context.Total.ToString("N", CultureInfo.CreateSpecificCulture("hu-HU")) @context.CurrencyCode
             </DisplayTemplate>
@@ -95,7 +96,8 @@
                 <Button Color="Color.Primary" Clicked="@context.Clicked">@context.LocalizationString</Button>
             </EditCommandTemplate>
             <SaveCommandTemplate>
-                <Button Type="ButtonType.Submit" PreventDefaultOnSubmit Color="Color.Primary" Clicked="context.Clicked">@context.LocalizationString</Button>
+                <Button Type="ButtonType.Submit" PreventDefaultOnSubmit Color="Color.Primary"
+                        Clicked="context.Clicked">@context.LocalizationString</Button>
             </SaveCommandTemplate>
             <DeleteCommandTemplate>
                 <Button Color="Color.Danger" Clicked="@context.Clicked">@context.LocalizationString</Button>
@@ -137,13 +139,13 @@
     {
         var transaction = savedRowItem.Item;
         await _konyveloService.CreateTransactionAsync(new CreateTransactionDto()
-            {
-                AccountId = transaction.AccountId,
-                Category = transaction.Category,
-                Date = transaction.Date,
-                Info = transaction.Info,
-                Total = transaction.Total
-            });
+        {
+            AccountId = transaction.AccountId,
+            Category = transaction.Category,
+            Date = transaction.Date,
+            Info = transaction.Info,
+            Total = transaction.Total
+        });
 
         await LoadTransactions();
     }
@@ -159,14 +161,14 @@
         }
 
         await _konyveloService.UpdateTransactionAsync(new UpdateTransactionDto()
-            {
-                AccountId = transaction.AccountId,
-                Category = transaction.Category,
-                Date = transaction.Date,
-                Info = transaction.Info,
-                Id = transaction.Id,
-                Total = transaction.Total
-            });
+        {
+            AccountId = transaction.AccountId,
+            Category = transaction.Category,
+            Date = transaction.Date,
+            Info = transaction.Info,
+            Id = transaction.Id,
+            Total = transaction.Total
+        });
 
         await LoadTransactions();
     }
@@ -177,4 +179,5 @@
 
         await LoadTransactions();
     }
+
 }
