@@ -35,7 +35,7 @@ public class FileKonyveloService : IKonyveloService
         using var workbook = new XLWorkbook(path);
         workbook.TryGetWorksheet("tranzakciók", out var transactionsSheet);
         var list = new List<GetTransactionDto>();
-        foreach (var row in transactionsSheet.Rows())
+        foreach (var row in transactionsSheet.Rows().Skip(1)) // headers
         {
             var date = DateOnly.FromDateTime(row.Cell(1).Value.GetDateTime());
             var type = row.Cell(2).GetText();
